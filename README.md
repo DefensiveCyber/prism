@@ -5,6 +5,7 @@ A production log classification engine. PRISM ingests raw log files,
 identifies their sourcetype using a signature engine, routes them into
 landing zones for Cribl pickup, and provides AI-powered analysis via the
 Lens module.
+
 <img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/aa633db2-85e5-44b3-8317-20354d571072" />
 <img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/4432814b-ad11-4877-afd2-e6b8c6cfe5e9" />
 <img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/f40b8653-5552-4e1f-9c5e-f5cea51c62cb" />
@@ -14,8 +15,6 @@ Lens module.
 <img width="1911" height="1029" alt="image" src="https://github.com/user-attachments/assets/7263dbd1-85de-425f-ba03-9cb560d92e9f" />
 <img width="683" height="482" alt="image" src="https://github.com/user-attachments/assets/7c6ea630-640c-4e55-8d97-a5e639dcd723" />
 <img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/309f4aae-dab8-4945-b92d-aaebc81b2c6a" />
-
-
 
 
 ---
@@ -167,7 +166,6 @@ PRISM_REDIS_URL=redis://localhost:6379/0
 PRISM_DB_URL=postgresql+psycopg2://prism:prism@localhost:5432/prism
 PRISM_OLLAMA_URL=http://localhost:11434
 PRISM_OLLAMA_MODEL=mistral
-PYTHONPATH=/home/advan/prism
 ENV
 ```
 
@@ -192,8 +190,10 @@ python3 -c "import db; db.init_db(); print('Schema ready')"
 | `PRISM_DB_URL` | `postgresql+psycopg2://prism:prism@localhost:5432/prism` | PostgreSQL DSN |
 | `PRISM_OLLAMA_URL` | `http://localhost:11434` | Ollama API base URL |
 | `PRISM_OLLAMA_MODEL` | `mistral` | LLM model for Lens AI |
-| `PYTHONPATH` | `/home/advan/prism` | Must point to PRISM root |
+
 | `PRISM_WSL_DISTRO` | `Ubuntu-24.04` | WSL2 distro name for folder open |
+
+> **Note:** `PYTHONPATH` is set automatically by `start.sh` from its own location. Do not add it to `.env`.
 
 ### `config/settings.yaml`
 | Setting | Default | Description |
@@ -475,8 +475,8 @@ The Lens module provides AI-powered log analysis using LogWhisperer and Ollama.
 - **Chat interface** — ask follow-up questions about the log content
 
 ### WSL2 path handling
-Windows paths like `\\wsl$\Ubuntu-24.04\home\advan\prism\landing\file.log`
-are automatically converted to `/home/advan/prism/landing/file.log`.
+Windows paths like `\\wsl$\Ubuntu-24.04\home\youruser\prism\landing\file.log`
+are automatically converted to `~/prism/landing/file.log`.
 
 ### Ollama status indicator
 The Lens page shows a status bar:
@@ -627,7 +627,7 @@ ollama list
 WSL UNC paths (`\\wsl$\...`) are auto-converted. If you see this error,
 ensure the file exists at the Linux path:
 ```bash
-ls /home/advan/prism/landing/<sourcetype>/<filename>
+ls ~/prism/landing/<sourcetype>/<filename>
 ```
 
 ### Review queue empty / not populating
