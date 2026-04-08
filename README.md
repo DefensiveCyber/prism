@@ -5,6 +5,7 @@ A production log classification engine. PRISM ingests raw log files,
 identifies their sourcetype using a signature engine, routes them into
 landing zones for Cribl pickup, and provides AI-powered analysis via the
 Lens module.
+<img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/aa633db2-85e5-44b3-8317-20354d571072" />
 
 ---
 
