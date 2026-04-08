@@ -27,6 +27,8 @@ Lens module.
 
 ---
 
+---
+
 ## Table of Contents
 1. [Architecture](#architecture)
 2. [Prerequisites](#prerequisites)
@@ -197,7 +199,7 @@ python3 -c "import db; db.init_db(); print('Schema ready')"
 | Setting | Default | Description |
 |---|---|---|
 | `review_queue_threshold` | `0.60` | Files below this confidence go to review queue |
-| `high_confidence_threshold` | `0.85` | Threshold for "high confidence" display |
+| `high_confidence_threshold` | `0.88` | Threshold for teal (high confidence) display |
 | `max_sample_lines` | `20` | Lines read from file for classification |
 | `file_read_bytes` | `8192` | Bytes read from file for classification |
 | `move_files` | `true` | Move files to landing zones (false = copy) |
@@ -317,7 +319,7 @@ echo $! > logs/gunicorn.pid
 ├── .gitignore                # Excludes .env, logs/, landing/, logwhisperer/, etc.
 │
 ├── config/
-│   ├── signatures.yaml       # 144 classification signatures
+│   ├── signatures.yaml       # 327 classification signatures
 │   └── settings.yaml         # App settings, watched dirs, thresholds
 │
 ├── parsers/
@@ -347,22 +349,23 @@ echo $! > logs/gunicorn.pid
 
 ## Signatures
 
-PRISM ships with **144 signatures** across 15 categories.
+PRISM ships with **327 signatures** across 16 categories.
 
 | Category | Count | Examples |
 |---|---|---|
-| network | 34 | Palo Alto, Fortinet, Check Point, Juniper, F5, Zeek, SonicWall, Zscaler |
-| security | 19 | Suricata, Snort, CrowdStrike, Okta, CyberArk, CEF, LEEF, Qualys |
-| windows | 14 | Security, System, Application, Sysmon, PowerShell, Defender, EVTX |
-| cloud | 12 | AWS CloudTrail, VPC Flow, Azure Audit, GCP Audit, CloudWatch |
-| endpoint | 11 | CrowdStrike Falcon, SentinelOne, Carbon Black, osquery, Defender ATP |
-| cisco | 9 | ASA/FTD, IOS, NX-OS, ISE, Meraki, Firepower, Umbrella |
+| network | 79 | Palo Alto, Fortinet, Check Point, Juniper, F5, Zeek, Zscaler, Netskope, Infoblox, Arista, Bluecoat |
+| security | 40 | Suricata, Snort, Okta, CyberArk, CEF, LEEF, Qualys, Wazuh, HashiCorp Vault, SailPoint, GitHub, GitLab |
+| cloud | 38 | AWS (17 sourcetypes), Azure/Entra (10), GCP (5), Zoom |
+| cisco | 31 | ASA, FTD, IOS, NX-OS, ISE, Meraki, SD-WAN (11), Duo, AMP, DNA Center, Stealthwatch, ThousandEyes |
+| windows | 24 | Security, Sysmon, PowerShell, Defender, AppLocker, Code Integrity, Firewall, BITS, DNS Client, Print |
+| endpoint | 21 | CrowdStrike (3), SentinelOne (3), Carbon Black, osquery, Defender ATP, Trend Micro, Cisco AMP |
+| infrastructure | 13 | VMware (10), Kubernetes (3), Docker (5), Arista CloudVision |
+| email | 13 | O365, Exchange, Proofpoint (2), Mimecast (2), Barracuda |
+| linux | 9 | secure, syslog, audit, auditd, cron, iptables, auth |
 | web | 9 | Apache, Nginx, IIS, HAProxy, Squid, Traefik, Tomcat |
 | database | 8 | MSSQL, MySQL, PostgreSQL, Oracle, MongoDB, Redis, Elasticsearch |
-| linux | 7 | secure, syslog, audit, auditd, cron, iptables, syslog-RFC |
-| email | 6 | O365, Exchange, Proofpoint, Mimecast, Barracuda Spam |
 | middleware | 6 | Kafka, RabbitMQ, ActiveMQ, ZooKeeper, IBM MQ, NATS |
-| monitoring | 3 | Nagios, Prometheus, Icinga2 |
+| monitoring | 6 | Nagios, Prometheus, Icinga2, PagerDuty, ServiceNow |
 | storage | 3 | NetApp ONTAP, Dell EMC VNX, Rubrik |
 | ot | 2 | Generic OT/ICS syslog, Claroty |
 | unknown | 1 | Generic JSON fallback |
@@ -373,13 +376,13 @@ PRISM ships with **144 signatures** across 15 categories.
   category: cisco
   vendor: Cisco
   product: ASA/FTD Firewall
-  confidence: 0.97
-  required_patterns:        # ALL must match — hard gate
+  confidence: 0.97          # Base confidence ceiling (0.0–1.0)
+  required_patterns:        # ALL must match — hard gate; drive 85% of floor score
     - '%ASA-\d+-\d+|%FTD-\d+-\d+'
-  line_patterns:            # Optional boosters
+  line_patterns:            # Optional boosters — each match raises score toward ceiling
     - 'Built (inbound|outbound)'
     - 'Teardown (TCP|UDP|ICMP)'
-  min_matches: 1
+  min_matches: 1            # Minimum optional patterns that must match
   # Optional cleaning overrides (auto-derived if omitted):
   filter_mode: line
   line_filter: '%ASA-\d+-\d+|%FTD-\d+-\d+'
@@ -387,13 +390,38 @@ PRISM ships with **144 signatures** across 15 categories.
   cleaning_enabled: true
 ```
 
+**Full signature catalog:** [SIGNATURES.md](SIGNATURES.md) — all 327 sourcetypes organized by vendor.
+
+**Key vendor coverage:**
+- **VMware:** 35 signatures — ESXi (vmkernel, hostd, vpxa, fdm, vobd, shell, auth, storage, vSAN), vCenter (vpxd, eam, sts, rhttpproxy), NSX, Horizon, Aria, Workspace ONE, Carbon Black
+- **Cisco:** 31 signatures — ASA/FTD, IOS, NX-OS, SD-WAN (12), ISE, Duo, AMP, DNA Center, Stealthwatch, ThousandEyes
+- **AWS:** 17 signatures — CloudTrail, VPC Flow, GuardDuty, Security Hub, WAF, Config, Inspector, Route53, ELB, IAM
+- **Azure/Entra:** 10 signatures — Sign-In, Audit, Provisioning, Activity, Sentinel, Defender for Cloud, Risk Detection
+- **GCP:** 7 signatures — Audit, VPC Flow, Firewall, DNS, IAM, Pub/Sub, Security Command Center
+
 ### Confidence scoring
+
+PRISM uses a **Floor + Boost** model:
+
+- **Required patterns** all match → establishes a floor of **85%** of the signature's base confidence
+- **Optional patterns** each matched → boost the score proportionally from the floor up to the full base confidence
+- **Score is always ≤ base confidence** — never inflated above the signature ceiling
+
 ```
-Required patterns all match  →  80% of base confidence
-Each optional pattern match  →  contributes remaining 20% proportionally
-Final score < 60%            →  file sent to Review Queue
-Final score ≥ 60%            →  file routed to landing zone
+Score = base_confidence × (0.85 + 0.15 × (optional_matched / optional_total))
 ```
+
+| Scenario | cisco:asa (base 97%) | Display color |
+|---|---|---|
+| Required only, 0 optionals matched | 82.5% | 🟡 Amber |
+| Required + some optionals | 85–96% | 🟢 Teal |
+| Required + all optionals | 97.0% | 🟢 Teal |
+| Score < 60% | — | 🔴 Review Queue |
+
+**UI color bands:**
+- 🟢 Teal ≥ 88% — strong match with optional pattern evidence
+- 🟡 Amber 76–88% — required patterns matched, fewer optionals (still confident)
+- 🔴 Red < 76% — routed to review queue
 
 ### Matched patterns display
 The result card shows two types of matched patterns with distinct styling:
@@ -404,6 +432,7 @@ The result card shows two types of matched patterns with distinct styling:
 - **View/edit:** UI → Configure → Signatures → Edit Patterns
 - **Add new:** UI → Configure → Signatures → + New Signature
 - **Edit cleaning:** UI → Configure → Cleaning Rules
+- **Full catalog:** See [SIGNATURES.md](SIGNATURES.md) for the complete list of all 327 sourcetypes organized by vendor and category
 
 ---
 
@@ -418,6 +447,7 @@ The result card shows two types of matched patterns with distinct styling:
 4. Signatures that pass required patterns are scored using optional patterns
 5. Highest scoring signature wins; tiebreaker is position in `signatures.yaml`
 6. File is routed to `landing/<sourcetype>/` or `_review_queue/` if confidence < 0.60
+7. Score uses Floor + Boost model — required match = 85% floor, optionals boost to ceiling
 
 ### Supported input formats
 | Format | Extension | Parser |
@@ -432,9 +462,6 @@ The result card shows two types of matched patterns with distinct styling:
 ---
 
 ## Log Cleaning
-<img width="1901" height="1033" alt="image" src="https://github.com/user-attachments/assets/da499463-5e29-4742-828d-64611b0fcf1c" />
-
-<img width="717" height="539" alt="image" src="https://github.com/user-attachments/assets/cb55e75c-37d3-41bc-bfee-6b99f3f6b344" />
 
 **File:** `cleaner.py`
 
@@ -487,7 +514,7 @@ landing/cisco_asa/
 
 ### Configuring Cleaning Rules (UI)
 
-Go to **Configure → Cleaning Rules**. The page shows all 144 signatures with:
+Go to **Configure → Cleaning Rules**. The page shows all 327 signatures with:
 - **Summary stats** — total, auto-derived, line, multiline, passthrough, custom counts
 - **Search bar** — filter by sourcetype or category (sticky above the table)
 - **Mode filter** — filter table by cleaning mode
@@ -539,7 +566,7 @@ Add fields directly to any signature in `config/signatures.yaml`:
 - **Path tab** — analyze any file by its Linux path (WSL UNC paths auto-converted)
 - **Upload File tab** — upload a file, classify and analyze in one step
 - **Directory tab** — scan an entire directory, create one session per file
-- **Sourcetype selector** — searchable combobox with all 144 sourcetypes
+- **Sourcetype selector** — searchable combobox with all 327 sourcetypes
 - **Session sidebar** — browse and reload previous analysis sessions
 - **Chat interface** — ask follow-up questions about the log content
 
@@ -580,7 +607,7 @@ are automatically converted to `/home/youruser/prism/landing/file.log`.
 ### Cleaning Rules
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/cleaning/derived` | All 144 signatures with effective cleaning config (explicit + auto-derived) |
+| `GET` | `/api/cleaning/derived` | All signatures with effective cleaning config (explicit + auto-derived) |
 | `POST` | `/api/cleaning/<sourcetype>/toggle` | Enable or disable cleaning for a signature |
 
 ### Landing Zones
@@ -628,7 +655,7 @@ are automatically converted to `/home/youruser/prism/landing/file.log`.
 | Dashboard | Monitor | Rolling 24h stats — classifications by category and sourcetype |
 | Review Queue | Monitor | Files PRISM wasn't confident about — manually assign sourcetype |
 | Landing Zones | Monitor | Browse routed files, view file counts, open folders |
-| Signatures | Configure | View/edit all 144 rules, add new signatures, required vs optional pattern display |
+| Signatures | Configure | View/edit all 327 rules, add new signatures, required vs optional pattern display |
 | Cleaning Rules | Configure | Per-signature cleaning config — modes, filters, enable/disable, live test |
 | Watched Dirs | Configure | Directories auto-classified when a new file appears |
 | Lens | Analyze | AI-powered log analysis and chat — powered by LogWhisperer + Mistral |
