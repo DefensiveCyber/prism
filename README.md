@@ -1,7 +1,7 @@
 # PRISM
 **Pattern Recognition & Intelligent Structure Mining**
 
-A Tier 2 production log classification engine. PRISM ingests raw log files,
+A production log classification engine. PRISM ingests raw log files,
 identifies their sourcetype using a signature engine, routes them into
 landing zones for Cribl pickup, and provides AI-powered analysis via the
 Lens module.
