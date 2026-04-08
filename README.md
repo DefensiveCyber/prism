@@ -6,14 +6,22 @@ identifies their sourcetype using a signature engine, routes them into
 landing zones for Cribl pickup, and provides AI-powered analysis via the
 Lens module.
 
-<img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/aa633db2-85e5-44b3-8317-20354d571072" />
-<img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/4432814b-ad11-4877-afd2-e6b8c6cfe5e9" />
-<img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/f40b8653-5552-4e1f-9c5e-f5cea51c62cb" />
-<img width="1916" height="1024" alt="image" src="https://github.com/user-attachments/assets/f60de3e2-f592-425a-8798-18c54cc072cc" />
-<img width="1913" height="1029" alt="image" src="https://github.com/user-attachments/assets/7b906edb-bc30-47fb-997a-d9f14b57ac7c" />
-<img width="1914" height="1029" alt="image" src="https://github.com/user-attachments/assets/14370319-5f1c-4840-9d0f-942f01be2e2a" />
-<img width="1911" height="1029" alt="image" src="https://github.com/user-attachments/assets/7263dbd1-85de-425f-ba03-9cb560d92e9f" />
+<img width="1901" height="1025" alt="image" src="https://github.com/user-attachments/assets/4252fa0e-c955-4acb-b652-5337a6de115e" />
+
+<img width="1912" height="1028" alt="image" src="https://github.com/user-attachments/assets/38495a74-69ec-49f3-bf92-f9bcdd33f21d" />
+
+<img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/9c4abfac-9fff-4e6a-8f87-6829b942e03b" />
+
+<img width="1918" height="1025" alt="image" src="https://github.com/user-attachments/assets/7835bd3b-0673-4444-9875-3e44d4b5386e" />
+
+<img width="1897" height="1023" alt="image" src="https://github.com/user-attachments/assets/46f47e7f-b6b6-4ece-8f3b-e4d3d7f43b1c" />
+
+<img width="1910" height="1023" alt="image" src="https://github.com/user-attachments/assets/dfea434a-f20e-46cf-a5a0-1024202217aa" />
+
+<img width="1899" height="1025" alt="image" src="https://github.com/user-attachments/assets/2596bb60-b218-4b92-87a1-a56a527b099c" />
+
 <img width="683" height="482" alt="image" src="https://github.com/user-attachments/assets/7c6ea630-640c-4e55-8d97-a5e639dcd723" />
+
 <img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/309f4aae-dab8-4945-b92d-aaebc81b2c6a" />
 
 
