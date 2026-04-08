@@ -29,11 +29,12 @@ Lens module.
 7. [File Structure](#file-structure)
 8. [Signatures](#signatures)
 9. [Classification Engine](#classification-engine)
-10. [Lens AI Module](#lens-ai-module)
-11. [API Reference](#api-reference)
-12. [UI Pages](#ui-pages)
-13. [Landing Zones](#landing-zones)
-14. [Troubleshooting](#troubleshooting)
+10. [Log Cleaning](#log-cleaning)
+11. [Lens AI Module](#lens-ai-module)
+12. [API Reference](#api-reference)
+13. [UI Pages](#ui-pages)
+14. [Landing Zones](#landing-zones)
+15. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -44,7 +45,7 @@ Browser
   └─→ Gunicorn (sync workers, :5000)
         └─→ Redis (Celery broker)
               ├─→ Celery priority worker  (single file classify)
-              └─→ Celery classify worker  (bulk scans)
+              └─→ Celery classify worker  (bulk scans + watcher)
 
 Watchdog watcher ─→ Redis ─→ Celery classify worker
 
@@ -103,7 +104,6 @@ See `requirements.txt`. Key packages:
 ### 1. Clone / extract PRISM
 ```bash
 cd ~
-# Extract from archive:
 tar -xzf prism_tier2.tar.gz
 mv prism_tier2 prism
 cd prism
@@ -118,11 +118,8 @@ pip3 install -r requirements.txt --break-system-packages
 ```bash
 sudo apt update
 sudo apt install -y postgresql postgresql-contrib
-
-# Start PostgreSQL
 sudo service postgresql start
 
-# Create database and user
 sudo -u postgres psql << 'SQL'
 CREATE USER prism WITH PASSWORD 'prism';
 CREATE DATABASE prism OWNER prism;
@@ -134,8 +131,6 @@ SQL
 ```bash
 sudo apt install -y redis-server
 sudo service redis-server start
-
-# Verify
 redis-cli ping   # should return PONG
 ```
 
@@ -148,7 +143,6 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```bash
 ollama pull mistral
 # Downloads ~4.1 GB — runs locally, no data leaves your machine
-# Mistral is made by Mistral AI (Paris, France)
 ```
 
 ### 7. Clone LogWhisperer
@@ -160,14 +154,11 @@ pip3 install -r logwhisperer/requirements.txt --break-system-packages
 
 ### 8. Configure environment
 ```bash
-cp .env.example .env   # if it exists, otherwise create:
-cat > .env << 'ENV'
-PRISM_REDIS_URL=redis://localhost:6379/0
-PRISM_DB_URL=postgresql+psycopg2://prism:prism@localhost:5432/prism
-PRISM_OLLAMA_URL=http://localhost:11434
-PRISM_OLLAMA_MODEL=mistral
-ENV
+cp .env.example .env
+# Edit .env and fill in your values
 ```
+
+> **Note:** `PYTHONPATH` is set automatically by `start.sh`. Do not add it to `.env`.
 
 ### 9. Initialize database schema
 ```bash
@@ -190,10 +181,9 @@ python3 -c "import db; db.init_db(); print('Schema ready')"
 | `PRISM_DB_URL` | `postgresql+psycopg2://prism:prism@localhost:5432/prism` | PostgreSQL DSN |
 | `PRISM_OLLAMA_URL` | `http://localhost:11434` | Ollama API base URL |
 | `PRISM_OLLAMA_MODEL` | `mistral` | LLM model for Lens AI |
-
 | `PRISM_WSL_DISTRO` | `Ubuntu-24.04` | WSL2 distro name for folder open |
 
-> **Note:** `PYTHONPATH` is set automatically by `start.sh` from its own location. Do not add it to `.env`.
+> **Note:** `PYTHONPATH` is set automatically by `start.sh` from its own location. Do not add it here.
 
 ### `config/settings.yaml`
 | Setting | Default | Description |
@@ -226,57 +216,42 @@ PRISM runs 7 services. All are managed by `start.sh` / `stop.sh`.
 - **Port:** 6379
 - **Purpose:** Message broker for Celery task queue; result backend
 - **Managed by:** `sudo service redis-server start/stop`
-- **Logs:** `/var/log/redis/`
 
 ### 2. PostgreSQL
 - **Port:** 5432
 - **Database:** `prism`
 - **Purpose:** Persists audit log, review queue, scan jobs, Lens AI sessions
 - **Managed by:** `sudo service postgresql start/stop`
-- **Tables:**
-  - `audit_log` — every classified file with result + confidence
-  - `review_queue` — files requiring manual review
-  - `scan_jobs` — bulk scan tracking
-  - `lens_sessions` — AI analysis sessions with full conversation history
+- **Tables:** `audit_log`, `review_queue`, `scan_jobs`, `lens_sessions`
 
 ### 3. Celery Priority Worker
-- **Queue:** `priority`
-- **Concurrency:** 4
-- **Purpose:** Handles single-file classification requests from the web UI (fast path)
+- **Queue:** `priority` | **Concurrency:** 4
+- **Purpose:** Single-file classification from the web UI
 - **Logs:** `logs/celery_priority.log`
-- **PID:** `logs/celery_priority.pid`
 
 ### 4. Celery Classify Worker
-- **Queue:** `classify`
-- **Concurrency:** 8
-- **Purpose:** Handles bulk directory scans and watchdog-triggered files
+- **Queue:** `classify` | **Concurrency:** 8
+- **Purpose:** Bulk directory scans and watchdog-triggered files
 - **Logs:** `logs/celery_classify.log`
-- **PID:** `logs/celery_classify.pid`
 
 ### 5. Watchdog File Watcher
-- **Purpose:** Monitors configured directories for new files; auto-classifies on arrival
-- **Config:** Add directories via UI → Watched Dirs page, or edit `config/settings.yaml`
+- **Purpose:** Monitors configured directories; auto-classifies new files on arrival
+- **Toggle:** UI → Watcher button (top-right header) — glows teal when running
 - **Logs:** `logs/watcher.log`
-- **PID:** `logs/watcher.pid`
 
 ### 6. Gunicorn Web Server
 - **Port:** 5000
 - **Purpose:** Serves the PRISM web UI and REST API
 - **Logs:** `logs/gunicorn_access.log`, `logs/gunicorn_error.log`
-- **PID:** `logs/gunicorn.pid`
 
 ### 7. Ollama
 - **Port:** 11434
-- **Purpose:** Local LLM inference server for the Lens AI module
-- **Model:** mistral (French-owned Mistral AI, runs 100% locally)
+- **Purpose:** Local LLM inference for Lens AI (Mistral by Mistral AI, runs 100% locally)
 - **Logs:** `logs/ollama.log`
-- **PID:** `logs/ollama.pid`
 
 ### 8. Flower (optional)
 - **Port:** 5555
 - **Purpose:** Celery task monitoring dashboard
-- **URL:** http://localhost:5555
-- **Logs:** `logs/flower.log`
 - **Install:** `pip3 install flower --break-system-packages`
 
 ---
@@ -288,7 +263,6 @@ PRISM runs 7 services. All are managed by `start.sh` / `stop.sh`.
 cd ~/prism
 ./start.sh
 ```
-
 Startup order: Redis → PostgreSQL → Ollama → Mistral warm-up → Celery workers → Watcher → Gunicorn → Flower
 
 ### Stop PRISM services only
@@ -301,9 +275,8 @@ Redis and PostgreSQL keep running. Safe for quick restarts.
 ```bash
 ./stop.sh --shutdown
 ```
-Stops all services including Redis and PostgreSQL, then runs `wsl --shutdown`.
 
-### Restart Gunicorn only (after code/template changes)
+### Restart Gunicorn only (after template changes)
 ```bash
 sudo fuser -k 5000/tcp
 gunicorn -c gunicorn.conf.py server:app >> logs/gunicorn_error.log 2>&1 &
@@ -320,17 +293,20 @@ echo $! > logs/gunicorn.pid
 ├── stop.sh                   # Stop all services (--shutdown for full teardown)
 ├── server.py                 # Flask application + all API endpoints
 ├── classifier.py             # Classification engine (signature matching)
+├── cleaner.py                # Log file cleaning engine (strips dirty lines before routing)
 ├── tasks.py                  # Celery task definitions
 ├── celery_app.py             # Celery factory
 ├── db.py                     # PostgreSQL models + CRUD (SQLAlchemy)
-├── router.py                 # Routes classified files to landing zones
+├── router.py                 # Routes classified files to landing zones, calls cleaner
 ├── watcher.py                # Watchdog file system watcher
 ├── lens.py                   # Lens AI module (LogWhisperer + Ollama)
 ├── audit.py                  # Audit log helpers
 ├── review_queue.py           # Review queue helpers
 ├── gunicorn.conf.py          # Gunicorn production configuration
 ├── requirements.txt          # Python package dependencies
-├── .env                      # Environment variables (create from .env.example)
+├── .env                      # Environment variables (never commit — in .gitignore)
+├── .env.example              # Template — copy to .env and fill in values
+├── .gitignore                # Excludes .env, logs/, landing/, logwhisperer/, etc.
 │
 ├── config/
 │   ├── signatures.yaml       # 144 classification signatures
@@ -344,26 +320,17 @@ echo $! > logs/gunicorn.pid
 ├── templates/
 │   └── index.html            # Full single-page UI
 │
-├── static/                   # Static assets (favicon, etc.)
+├── static/                   # Static assets
 │
-├── logwhisperer/             # LogWhisperer AI log summarization tool
-│   └── logwhisperer.py       # Entry point called by lens.py
+├── logwhisperer/             # LogWhisperer AI log summarization (cloned separately)
 │
 ├── logs/                     # Runtime logs (created on first start)
-│   ├── gunicorn_access.log
-│   ├── gunicorn_error.log
-│   ├── celery_priority.log
-│   ├── celery_classify.log
-│   ├── watcher.log
-│   ├── ollama.log
-│   └── flower.log
 │
 ├── landing/                  # Routed log files (created on first start)
 │   ├── cisco_asa/
 │   ├── WinEventLog_Security/
-│   ├── pan_traffic/
-│   ├── _review_queue/        # Files below confidence threshold
-│   └── _unknown/             # Files with no signature match
+│   ├── _review_queue/        # Confidence < 60%
+│   └── _unknown/             # No signature matched
 │
 └── state/                    # Watcher state persistence
 ```
@@ -398,14 +365,18 @@ PRISM ships with **144 signatures** across 15 categories.
   category: cisco
   vendor: Cisco
   product: ASA/FTD Firewall
-  confidence: 0.97          # Base confidence (0.0–1.0)
+  confidence: 0.97
   required_patterns:        # ALL must match — hard gate
     - '%ASA-\d+-\d+|%FTD-\d+-\d+'
-  line_patterns:            # Optional boosters — each match raises confidence
+  line_patterns:            # Optional boosters
     - 'Built (inbound|outbound)'
     - 'Teardown (TCP|UDP|ICMP)'
-    - 'Deny (tcp|udp|icmp)'
-  min_matches: 1            # Minimum optional patterns to proceed
+  min_matches: 1
+  # Optional cleaning overrides (auto-derived if omitted):
+  filter_mode: line
+  line_filter: '%ASA-\d+-\d+|%FTD-\d+-\d+'
+  multiline_mode: ''
+  cleaning_enabled: true
 ```
 
 ### Confidence scoring
@@ -416,10 +387,15 @@ Final score < 60%            →  file sent to Review Queue
 Final score ≥ 60%            →  file routed to landing zone
 ```
 
+### Matched patterns display
+The result card shows two types of matched patterns with distinct styling:
+- **Teal chips** — required patterns (hard gate — must all match)
+- **Indigo/purple chips** — optional patterns that matched (confidence boosters)
+
 ### Managing signatures
-- **View/edit:** UI → Signatures page → Edit Patterns
-- **Add new:** UI → Signatures → + New Signature
-- **Rebuild from scratch:** `python3 build_signatures.py`
+- **View/edit:** UI → Configure → Signatures → Edit Patterns
+- **Add new:** UI → Configure → Signatures → + New Signature
+- **Edit cleaning:** UI → Configure → Cleaning Rules
 
 ---
 
@@ -429,16 +405,11 @@ Final score ≥ 60%            →  file routed to landing zone
 
 ### How it works
 1. Reads up to `file_read_bytes` (8192) bytes from the file
-2. Extracts text via format-specific parsers:
-   - `.evtx` → `parsers/evtx_parser.py` (Windows Event Log binary)
-   - `.csv` → `parsers/csv_parser.py`
-   - Elasticsearch NDJSON → `parsers/elastic_parser.py`
-   - All others → raw text read
+2. Extracts text via format-specific parsers (`.evtx`, `.csv`, Elasticsearch NDJSON, plain text)
 3. Tests every signature's `required_patterns` against the text
 4. Signatures that pass required patterns are scored using optional patterns
-5. Highest scoring signature wins
-6. Tiebreaker: first signature in file (position in `signatures.yaml`)
-7. File is routed to `landing/<sourcetype>/` or `_review_queue/` if confidence < 0.60
+5. Highest scoring signature wins; tiebreaker is position in `signatures.yaml`
+6. File is routed to `landing/<sourcetype>/` or `_review_queue/` if confidence < 0.60
 
 ### Supported input formats
 | Format | Extension | Parser |
@@ -452,14 +423,101 @@ Final score ≥ 60%            →  file routed to landing zone
 
 ---
 
+## Log Cleaning
+
+**File:** `cleaner.py`
+
+When a file is classified and routed to a landing zone, PRISM first strips
+non-conforming content — banners, headers, separator lines, and anything that
+doesn't match the expected log format. Clean events go to the landing zone
+file. Stripped content goes to a `.noise.log` sidecar file in the same folder.
+
+Cleaning runs automatically for all three classification paths: single file,
+bulk scan, and watched directory.
+
+### Filter Modes
+
+| Mode | Description | Typical sourcetypes |
+|---|---|---|
+| `auto` | Derived automatically from `required_patterns` at classification time | All (default) |
+| `line` | One event per line. Lines matching `line_filter` are kept, others stripped | Cisco ASA, PAN CSV, Linux syslog, CEF, LEEF, auditd |
+| `multiline` | Events span multiple lines. Complete blocks extracted, noise stripped | WinEvent XML, CloudTrail JSON, Suricata EVE, Zeek TSV |
+| `passthrough` | No cleaning. File routed as-is | Formats without a reliable filter |
+
+### Multiline Sub-modes
+
+| Sub-mode | Format | How it works |
+|---|---|---|
+| `json_lines` | NDJSON, one JSON object per line | Each line parsed as JSON; invalid lines stripped |
+| `json_object` | Multi-line JSON (CloudTrail, Azure, Okta) | Brace depth tracking to find complete objects |
+| `xml_event` | XML blocks (WinEvent, EVTX) | `<Event>...</Event>` blocks extracted; preamble stripped |
+| `zeek_tsv` | Zeek/Bro TSV logs | `#fields` headers kept; data rows validated by column count |
+| `iis` | IIS W3C logs | `#Fields:` headers kept; data rows kept |
+| `csv_with_header` | CSV exports | First non-banner line is header; subsequent rows kept |
+
+### Built-in Banner Detection
+
+Regardless of filter mode, these are always stripped:
+- Pure separator lines (`===`, `---`, `###`, `***`)
+- `SHOW LOGGING` and similar Cisco CLI output headers
+- `CISCO:IOS:XE VER. x.x` version headers
+- Blank lines at the start of a file
+
+### Noise Files
+
+Stripped lines are written to `<filename>.noise.log` in the same landing zone
+folder as the clean file. They are never permanently deleted.
+
+```
+landing/cisco_asa/
+  20240101_120000_firewall.log        ← 268 clean %ASA-* events
+  20240101_120000_firewall.noise.log  ← 4 stripped header lines
+```
+
+### Configuring Cleaning Rules (UI)
+
+Go to **Configure → Cleaning Rules**. The page shows all 144 signatures with:
+- **Summary stats** — total, auto-derived, line, multiline, passthrough, custom counts
+- **Search bar** — filter by sourcetype or category (sticky above the table)
+- **Mode filter** — filter table by cleaning mode
+- **Enabled toggle** — enable or disable cleaning per signature without removing the rule
+- **Edit modal** — click any row or its Edit button to open the edit modal
+
+The edit modal provides:
+- **Filter Mode** dropdown — Auto / line / multiline / passthrough with plain-English description of each
+- **Line Filter** field — regex a valid line must match; shows the auto-derived value for reference
+- **Multiline Mode** dropdown — choose the sub-mode for your log format
+- **Live Test** area — paste sample log lines and see instantly which are kept (✓ green) and which are stripped (✗ red) before saving
+
+**Reset** — removes any custom rule for a signature and returns it to auto-derivation.
+
+### Configuring Cleaning Rules (YAML)
+
+Add fields directly to any signature in `config/signatures.yaml`:
+
+```yaml
+- sourcetype: cisco:ios:show_log
+  filter_mode: line
+  line_filter: '%[A-Z][A-Z0-9_-]+-\d+-[A-Z0-9_]+:|Syslog logging:'
+  multiline_mode: ''
+  cleaning_enabled: true
+```
+
+| Field | Values | Default |
+|---|---|---|
+| `filter_mode` | `line` \| `multiline` \| `passthrough` \| `""` | auto-derived |
+| `line_filter` | regex string | auto-derived from `required_patterns[0]` |
+| `multiline_mode` | `json_lines` \| `json_object` \| `xml_event` \| `zeek_tsv` \| `iis` \| `csv_with_header` \| `""` | auto-derived |
+| `cleaning_enabled` | `true` \| `false` | `true` |
+
+---
+
 ## Lens AI Module
 
 **File:** `lens.py`
 
-The Lens module provides AI-powered log analysis using LogWhisperer and Ollama.
-
 ### How it works
-1. User clicks **◎ Analyze in Lens** on any classified file (or submits manually)
+1. User clicks **◎ Analyze in Lens** on any classified file
 2. PRISM calls LogWhisperer (`logwhisperer/logwhisperer.py`) on the file
 3. LogWhisperer uses Ollama + Mistral to generate a plain-English summary
 4. If LogWhisperer fails, PRISM falls back to calling Ollama directly
@@ -476,7 +534,7 @@ The Lens module provides AI-powered log analysis using LogWhisperer and Ollama.
 
 ### WSL2 path handling
 Windows paths like `\\wsl$\Ubuntu-24.04\home\youruser\prism\landing\file.log`
-are automatically converted to `~/prism/landing/file.log`.
+are automatically converted to `/home/youruser/prism/landing/file.log`.
 
 ---
 
@@ -504,8 +562,15 @@ are automatically converted to `~/prism/landing/file.log`.
 |---|---|---|
 | `GET` | `/api/signatures` | List all signatures |
 | `POST` | `/api/signatures` | Create a new signature |
-| `PUT` | `/api/signatures/<sourcetype>/patterns` | Update patterns |
+| `GET` | `/api/signatures/<sourcetype>` | Get raw signature detail (YAML dict) |
+| `PUT` | `/api/signatures/<sourcetype>/patterns` | Update patterns and cleaning config |
 | `DELETE` | `/api/signatures/<sourcetype>` | Delete a signature |
+
+### Cleaning Rules
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/cleaning/derived` | All 144 signatures with effective cleaning config (explicit + auto-derived) |
+| `POST` | `/api/cleaning/<sourcetype>/toggle` | Enable or disable cleaning for a signature |
 
 ### Landing Zones
 | Method | Endpoint | Description |
@@ -539,6 +604,7 @@ are automatically converted to `~/prism/landing/file.log`.
 | `DELETE` | `/api/watched-dirs/remove` | Remove a watched directory |
 | `GET` | `/api/watcher/status` | Watcher running state |
 | `POST` | `/api/watcher/toggle` | Start/stop watcher |
+| `GET` | `/api/file/view` | View file contents (used by queue file viewer) |
 
 ---
 
@@ -551,9 +617,30 @@ are automatically converted to `~/prism/landing/file.log`.
 | Dashboard | Monitor | Rolling 24h stats — classifications by category and sourcetype |
 | Review Queue | Monitor | Files PRISM wasn't confident about — manually assign sourcetype |
 | Landing Zones | Monitor | Browse routed files, view file counts, open folders |
-| Signatures | Configure | View/edit all 144 rules, add new signatures, confidence scale |
+| Signatures | Configure | View/edit all 144 rules, add new signatures, required vs optional pattern display |
+| Cleaning Rules | Configure | Per-signature cleaning config — modes, filters, enable/disable, live test |
 | Watched Dirs | Configure | Directories auto-classified when a new file appears |
 | Lens | Analyze | AI-powered log analysis and chat — powered by LogWhisperer + Mistral |
+
+### Signatures page
+- Required patterns displayed as **teal chips**, optional as **indigo chips**
+- Edit Patterns modal — check a pattern to make it required; uncheck for optional
+- Confidence bar shown per signature
+
+### Cleaning Rules page
+- Summary stats bar: total / auto / line / multiline / passthrough / custom counts
+- Sticky search bar above the table — filter by sourcetype or category as you type
+- Mode filter dropdown — show only signatures of a given cleaning mode
+- Row count shown ("32 of 144 signatures")
+- **Enabled toggle** per row — disable cleaning without deleting the rule; disabled rows dim to 50% opacity
+- Click any row to open the Edit modal
+- Edit modal shows: Filter Mode with description, Line Filter with auto-derived hint, Multiline Mode, Live Test area
+- **Reset** button removes custom rule and returns to auto-derivation
+
+### Watcher button
+The **WATCHER** indicator in the top-right header shows:
+- **Dim grey dot + grey text** — watcher is OFF
+- **Glowing teal dot + teal text** — watcher is ON and monitoring directories
 
 ---
 
@@ -563,19 +650,22 @@ Files are routed to folders under `landing/` named after their sourcetype:
 
 ```
 landing/
-  cisco_asa/          ← Cisco ASA/FTD firewall logs
+  cisco_asa/                                    ← clean %ASA-* events
+    20240101_120000_firewall.log
+    20240101_120000_firewall.noise.log           ← stripped banner lines
   WinEventLog_Security/
-  pan_traffic/        ← Palo Alto traffic logs
-  linux_secure/       ← /var/log/secure (SSH, sudo, PAM)
+  pan_traffic/
+  linux_secure/
   aws_cloudtrail/
-  suricata_eve/
-  ...
-  _review_queue/      ← Confidence < 60%, needs manual review
-  _unknown/           ← No signature matched
+  _review_queue/                                ← confidence < 60%
+  _unknown/                                     ← no signature matched
 ```
 
 Colons in sourcetype names are replaced with underscores in folder names
 (e.g. `cisco:asa` → `cisco_asa/`).
+
+Clean files and their `.noise.log` sidecars always share the same timestamp
+prefix so they stay paired in directory listings.
 
 ---
 
@@ -583,18 +673,14 @@ Colons in sourcetype names are replaced with underscores in folder names
 
 ### Gunicorn won't start
 ```bash
-# Check what's on port 5000
 sudo fuser -k 5000/tcp
 tail -20 logs/gunicorn_error.log
 ```
 
 ### Celery workers not processing jobs
 ```bash
-# Check workers are running
 celery -A celery_app inspect active
 tail -20 logs/celery_priority.log
-
-# Restart workers
 pkill -f "celery.*celery_app"
 ./start.sh
 ```
@@ -603,36 +689,41 @@ pkill -f "celery.*celery_app"
 ```bash
 sudo service postgresql status
 sudo service postgresql start
-# Test connection:
 psql -U prism -d prism -h localhost -c "SELECT 1"
 ```
 
 ### Ollama not responding
 ```bash
-# Check if running
 curl http://localhost:11434/api/tags
-# Start manually:
 ollama serve
-# Check model is pulled:
 ollama list
 ```
 
+### Cleaning not stripping lines
+Check that the signature's `sig_dict` is being passed from tasks.py via
+`clf.get_signature_detail(result.sourcetype)` — this returns the raw YAML dict
+with string patterns that `derive_filter_config` requires. Using the compiled
+`Signature` dataclass object will silently skip cleaning.
+
+Also verify `cleaning_enabled` is `true` for the signature on the Cleaning
+Rules page.
+
 ### Lens shows "File not found" with Windows paths
-WSL UNC paths (`\\wsl$\...`) are auto-converted. If you see this error,
-ensure the file exists at the Linux path:
+WSL UNC paths (`\\wsl$\...`) are auto-converted. Verify the file exists:
 ```bash
-ls ~/prism/landing/<sourcetype>/<filename>
+ls /home/youruser/prism/landing/<sourcetype>/<filename>
 ```
 
-### Review queue empty / not populating
-Files below 60% confidence go to `_review_queue/` and are written to the
-`review_queue` PostgreSQL table. Check:
-```bash
-psql -U prism -d prism -h localhost -c "SELECT COUNT(*) FROM review_queue"
-tail -20 logs/celery_classify.log
+### Cleaning Rules page loads blank
+If the table appears empty, open browser DevTools console and run:
+```javascript
+await loadCleaning()
 ```
+If this populates it, there is a timing issue. This was fixed by ensuring a
+single `go()` function handles all page navigation — check that only one
+`go()` definition exists in `templates/index.html`.
 
-### Check all service status at once
+### Check all service status
 ```bash
 ps aux | grep -E "(gunicorn|celery|ollama|redis|postgres|watcher)" | grep -v grep
 ```
@@ -648,19 +739,14 @@ cd ~/prism && ./start.sh
 # Stop PRISM services (Redis + PostgreSQL keep running)
 ./stop.sh
 
-# Stop everything + shut down WSL2
+# Full shutdown + WSL2
 ./stop.sh --shutdown
 
 # View live logs
 tail -f logs/gunicorn_error.log
 tail -f logs/celery_priority.log
 tail -f logs/watcher.log
-
-# Rebuild signatures
-python3 build_signatures.py
-
-# Initialize / migrate database schema
-python3 -c "import db; db.init_db()"
+tail -f logs/ollama.log
 
 # Test classifier directly
 python3 -c "
@@ -670,10 +756,22 @@ r = clf.classify('/path/to/logfile.log')
 print(r.sourcetype, r.confidence)
 "
 
-# Check Ollama model
+# Test cleaner directly
+python3 -c "
+from cleaner import clean_file, derive_filter_config
+sig = {'sourcetype':'cisco:asa','required_patterns':['%ASA-\d+-\d+']}
+cfg = derive_filter_config(sig)
+stats = clean_file('dirty.log', 'clean.log', cfg['filter_mode'], cfg['line_filter'])
+print(stats)
+"
+
+# Hit the cleaning/derived API
+curl http://localhost:5000/api/cleaning/derived | python3 -m json.tool | head -30
+
+# Check Ollama
 ollama list
 ollama pull mistral
 
-# Pull a different model (must also update .env PRISM_OLLAMA_MODEL)
-ollama pull llama3.1
+# Initialize / migrate database schema
+python3 -c "import db; db.init_db()"
 ```
