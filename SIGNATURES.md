@@ -613,6 +613,6 @@ Every signature includes automatic log cleaning — dirty lines (banners, header
 | `multiline/zeek_tsv` | 8 | All Zeek logs (conn, dns, http, ssl, files, dhcp, notice, weird) |
 | `multiline/iis` | 2 | IIS W3C, Bluecoat ProxySG W3C |
 | `multiline/csv_with_header` | 2 | PAN Traffic CSV, Generic Firewall CSV |
-| `passthrough` | 0 | All signatures have a defined cleaning mode |
+| `passthrough` | 0 | Signatures without a reliable line parsing pattern |
 
 See [README.md](README.md) for full cleaning documentation.
