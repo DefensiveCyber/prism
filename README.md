@@ -478,12 +478,6 @@ The Lens module provides AI-powered log analysis using LogWhisperer and Ollama.
 Windows paths like `\\wsl$\Ubuntu-24.04\home\youruser\prism\landing\file.log`
 are automatically converted to `~/prism/landing/file.log`.
 
-### Ollama status indicator
-The Lens page shows a status bar:
-- 🟢 Green — Ollama running, model available
-- 🟡 Amber — Ollama running, model not found (`ollama pull mistral`)
-- 🔴 Red — Ollama not running (`ollama serve`)
-
 ---
 
 ## API Reference
