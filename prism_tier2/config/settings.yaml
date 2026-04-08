@@ -1,0 +1,27 @@
+app:
+  name: PRISM
+  version: 1.0.0
+  host: 0.0.0.0
+  port: 5000
+classification:
+  review_queue_threshold: 0.6
+  high_confidence_threshold: 0.85
+  max_sample_lines: 20
+  file_read_bytes: 8192
+  move_files: true
+landing:
+  base_dir: landing
+watched_dirs: []
+include_extensions:
+- .log
+- .txt
+- .csv
+- .json
+- .xml
+- .gz
+- ''
+exclude_extensions:
+- .review.txt
+- .reason.txt
+- .pyc
+- .swp

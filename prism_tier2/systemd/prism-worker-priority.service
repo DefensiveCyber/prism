@@ -1,0 +1,24 @@
+[Unit]
+Description=PRISM Celery Worker - Priority Queue
+After=network.target redis.service postgresql.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=prism
+Group=prism
+WorkingDirectory=/opt/prism
+EnvironmentFile=/opt/prism/.env
+Environment=PYTHONPATH=/opt/prism
+ExecStart=/opt/prism/venv/bin/celery -A celery_app worker \
+    --loglevel=info \
+    --queues=priority \
+    --concurrency=4 \
+    --hostname=priority@%%h
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/opt/prism/logs/celery_priority.log
+StandardError=append:/opt/prism/logs/celery_priority.log
+
+[Install]
+WantedBy=multi-user.target
