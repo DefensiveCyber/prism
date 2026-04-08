@@ -6,6 +6,17 @@ identifies their sourcetype using a signature engine, routes them into
 landing zones for Cribl pickup, and provides AI-powered analysis via the
 Lens module.
 <img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/aa633db2-85e5-44b3-8317-20354d571072" />
+<img width="1916" height="1026" alt="image" src="https://github.com/user-attachments/assets/4432814b-ad11-4877-afd2-e6b8c6cfe5e9" />
+<img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/f40b8653-5552-4e1f-9c5e-f5cea51c62cb" />
+<img width="1916" height="1024" alt="image" src="https://github.com/user-attachments/assets/f60de3e2-f592-425a-8798-18c54cc072cc" />
+<img width="1913" height="1029" alt="image" src="https://github.com/user-attachments/assets/7b906edb-bc30-47fb-997a-d9f14b57ac7c" />
+<img width="1914" height="1029" alt="image" src="https://github.com/user-attachments/assets/14370319-5f1c-4840-9d0f-942f01be2e2a" />
+<img width="1911" height="1029" alt="image" src="https://github.com/user-attachments/assets/7263dbd1-85de-425f-ba03-9cb560d92e9f" />
+<img width="683" height="482" alt="image" src="https://github.com/user-attachments/assets/7c6ea630-640c-4e55-8d97-a5e639dcd723" />
+<img width="1917" height="1027" alt="image" src="https://github.com/user-attachments/assets/309f4aae-dab8-4945-b92d-aaebc81b2c6a" />
+
+
+
 
 ---
 
