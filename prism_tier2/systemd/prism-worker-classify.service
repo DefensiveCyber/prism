@@ -1,0 +1,24 @@
+[Unit]
+Description=PRISM Celery Worker - Classify Queue
+After=network.target redis.service postgresql.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=prism
+Group=prism
+WorkingDirectory=/opt/prism
+EnvironmentFile=/opt/prism/.env
+Environment=PYTHONPATH=/opt/prism
+ExecStart=/opt/prism/venv/bin/celery -A celery_app worker \
+    --loglevel=info \
+    --queues=classify \
+    --concurrency=8 \
+    --hostname=classify@%%h
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/opt/prism/logs/celery_classify.log
+StandardError=append:/opt/prism/logs/celery_classify.log
+
+[Install]
+WantedBy=multi-user.target

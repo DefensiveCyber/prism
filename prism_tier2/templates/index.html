@@ -1,0 +1,3286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRISM</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Spectrum palette — violet → indigo → cyan → green → amber */
+  --c-violet: #9b5de5;
+  --c-indigo: #5b6cf9;
+  --c-cyan:   #00c4e8;
+  --c-teal:   #00e5b0;
+  --c-green:  #38e06e;
+  --c-amber:  #f5c842;
+  --c-red:    #ff4060;
+
+  /* Spectrum gradient (used throughout) */
+  --spectrum: linear-gradient(90deg, var(--c-violet), var(--c-indigo), var(--c-cyan), var(--c-teal), var(--c-green));
+  --spectrum-diag: linear-gradient(135deg, var(--c-violet), var(--c-indigo), var(--c-cyan), var(--c-teal));
+
+  /* Surfaces */
+  --bg:       #080b10;
+  --surf:     #0d1018;
+  --surf2:    #131824;
+  --surf3:    #181e2e;
+  --border:   #1c2335;
+  --border2:  #232d45;
+
+  /* Text */
+  --text:     #d8e4f4;
+  --text2:    #6e82a8;
+  --text3:    #3a4a68;
+
+  /* Functional */
+  --warn:     var(--c-amber);
+  --danger:   var(--c-red);
+  --success:  var(--c-teal);
+
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Rajdhani', sans-serif;
+  --r: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+html, body { height: 100%; }
+body {
+  font-family: var(--display);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════ HEADER */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* Spectrum line under header */
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--spectrum);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Prism SVG mark */
+.prism-mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.logo-name {
+  font-family: var(--display);
+  font-size: 1.571rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  background: var(--spectrum);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.logo-tag {
+  font-family: var(--mono);
+  font-size: 0.571rem;
+  letter-spacing: .1em;
+  color: var(--text3);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.625em;
+}
+
+.watcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  font-family: var(--mono);
+  font-size: 0.714rem;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--surf2);
+  color: var(--text2);
+  user-select: none;
+}
+.watcher-btn:hover { border-color: var(--c-teal); color: var(--c-teal); }
+.watcher-btn.on {
+  border-color: var(--c-teal);
+  color: var(--c-teal);
+  background: rgba(0,229,176,.07);
+}
+.watcher-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text3);
+  box-shadow: none;
+  transition: all .3s;
+}
+.watcher-btn.on .watcher-dot {
+  background: var(--c-teal);
+  box-shadow: 0 0 7px var(--c-teal);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ═══════════════════════════════════ SHELL */
+.shell { display: flex; flex: 1; overflow: hidden; }
+
+/* ═══════════════════════════════════ SIDEBAR */
+nav {
+  width: 14em;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surf);
+  padding: 20px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.nav-section {
+  font-family: var(--mono);
+  font-size: 1rem; /* CLASSIFY / MONITOR / CONFIGURE */
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0.875em 1.25em 0.3125em;
+}
+
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5625em 1.25em;
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--text2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  cursor: pointer;
+  position: relative;
+}
+nav a:hover { color: var(--text); background: var(--surf2); }
+nav a.active {
+  color: var(--c-cyan);
+  border-left-color: var(--c-cyan);
+  background: rgba(0,196,232,.06);
+}
+
+/* Spectrum accent for each nav item when active */
+nav a[data-p="classify"].active   { color: var(--c-violet); border-left-color: var(--c-violet); background: rgba(155,93,229,.06); }
+nav a[data-p="bulk"].active       { color: var(--c-indigo); border-left-color: var(--c-indigo); background: rgba(91,108,249,.06); }
+nav a[data-p="dashboard"].active  { color: var(--c-cyan);   border-left-color: var(--c-cyan);   background: rgba(0,196,232,.06); }
+nav a[data-p="queue"].active      { color: var(--c-amber);  border-left-color: var(--c-amber);  background: rgba(245,200,66,.06); }
+nav a[data-p="landing"].active    { color: var(--c-teal);   border-left-color: var(--c-teal);   background: rgba(0,229,176,.06); }
+nav a[data-p="signatures"].active { color: var(--c-green);  border-left-color: var(--c-green);  background: rgba(56,224,110,.06); }
+nav a[data-p="watchdirs"].active  { color: var(--c-amber);  border-left-color: var(--c-amber);  background: rgba(245,200,66,.06); }
+
+.nav-icon { width: 18px; text-align: center; font-size: 1.0rem; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--c-amber);
+  color: #000;
+  font-size: 0.64rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════ MAIN */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.625em 1.75em;
+  background: var(--bg);
+}
+
+.page { display: none; }
+.page.active { display: block; animation: fadeUp .2s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ═══════════════════════════════════ PAGE HEADER */
+.ph { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 16px; }
+.ph-left .title {
+  font-family: var(--display);
+  font-size: 1.571rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1;
+}
+.ph-left .sub { font-family: var(--mono); font-size: 0.857rem; color: var(--text2); margin-top: 5px; }
+.ph-right { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Colored page titles */
+#page-classify .title  { background: linear-gradient(90deg, var(--c-violet), var(--c-indigo)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-bulk .title      { background: linear-gradient(90deg, var(--c-indigo), var(--c-cyan));   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-dashboard .title { background: linear-gradient(90deg, var(--c-cyan), var(--c-teal));     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-queue .title     { background: linear-gradient(90deg, var(--c-amber), var(--c-red));     -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-landing .title   { background: linear-gradient(90deg, var(--c-teal), var(--c-green));    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-signatures .title{ background: linear-gradient(90deg, var(--c-green), var(--c-cyan));    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+#page-watchdirs .title { background: linear-gradient(90deg, var(--c-amber), var(--c-teal));    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+/* ═══════════════════════════════════ CARDS */
+.card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.25em 1.375em;
+  margin-bottom: 1.125em;
+  position: relative;
+}
+
+/* Subtle spectrum top-edge accent on card hover */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--spectrum);
+  opacity: 0;
+  transition: opacity .3s;
+  border-radius: var(--r) var(--r) 0 0;
+}
+.card:hover::before { opacity: .5; }
+
+.card-title {
+  font-family: var(--display);
+  font-size: 0.786rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ═══════════════════════════════════ GRIDS */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+@media(max-width:960px){ .g2,.g4{ grid-template-columns:1fr; } }
+
+/* ═══════════════════════════════════ STAT TILES */
+.stat {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.stat::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 7px;
+}
+.stat-value {
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.stat-v { color: var(--c-violet); }
+.stat-b { color: var(--c-indigo); }
+.stat-c { color: var(--c-cyan); }
+.stat-t { color: var(--c-teal); }
+.stat-g { color: var(--c-green); }
+.stat-a { color: var(--c-amber); }
+.stat-r { color: var(--c-red); }
+.stat-v::after { background: var(--c-violet); }
+.stat-b::after { background: var(--c-indigo); }
+.stat-c::after { background: var(--c-cyan);   }
+.stat-a::after { background: var(--c-amber);  }
+
+/* ═══════════════════════════════════ BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  font-family: var(--display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--spectrum);
+  color: #000;
+  border: none;
+}
+.btn-primary:hover { opacity: .88; box-shadow: 0 0 18px rgba(0,196,232,.3); }
+.btn-secondary {
+  background: var(--surf2);
+  border-color: var(--border2);
+  color: var(--text2);
+}
+.btn-secondary:hover { border-color: var(--c-cyan); color: var(--c-cyan); }
+.btn-danger {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-danger:hover { background: rgba(255,64,96,.1); }
+.clear-menu-item {
+  display:block; width:100%; text-align:left; padding:8px 14px;
+  background:none; border:none; color:var(--text); font-size: 0.857rem;
+  cursor:pointer; transition:background .15s;
+}
+.clear-menu-item:hover { background:var(--surf); }
+.btn-sm { padding: 4px 10px; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ═══════════════════════════════════ INPUTS */
+.inp {
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.857rem;
+  padding: 0.44em 0.69em;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+.inp:focus { border-color: var(--c-cyan); }
+.inp::placeholder { color: var(--text3); }
+select.inp { cursor: pointer; }
+select.inp option { background: var(--surf); }
+textarea.inp { resize: vertical; min-height: 80px; line-height: 1.7; }
+
+.lbl {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 5px;
+  display: block;
+}
+
+.frow { margin-bottom: 14px; }
+.frow-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.frow-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+/* ═══════════════════════════════════ DROP ZONE */
+.drop {
+  border: 2px dashed var(--border2);
+  border-radius: var(--r);
+  padding: 40px 24px;
+  text-align: center;
+  transition: all .2s;
+  cursor: pointer;
+  position: relative;
+}
+.drop:hover, .drop.drag-over {
+  border-color: var(--c-cyan);
+  background: rgba(0,196,232,.04);
+  box-shadow: 0 0 28px rgba(0,196,232,.1);
+}
+.drop input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.drop-icon { font-size: 2.286rem; margin-bottom: 10px; }
+.drop-title { font-family: var(--display); font-size: 1.071rem; font-weight: 600; margin-bottom: 4px; }
+.drop-sub { font-family: var(--mono); font-size: 0.786rem; color: var(--text2); }
+.drop-sub span { color: var(--c-cyan); }
+
+/* ═══════════════════════════════════ TOGGLE */
+.toggle-row { display:flex; align-items:center; gap:10px; margin-top:12px; font-family:var(--mono); font-size: 0.786rem; color:var(--text2); }
+.toggle { position:relative; width:36px; height:19px; display:inline-block; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:var(--border2); border-radius:20px; cursor:pointer; transition:background .2s; }
+.toggle-slider::before { content:''; position:absolute; width:13px; height:13px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s; }
+.toggle input:checked + .toggle-slider { background: var(--c-cyan); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(17px); }
+
+/* ═══════════════════════════════════ RESULT CARD */
+.result-card {
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 18px 22px;
+  margin-top: 16px;
+  animation: fadeUp .22s ease;
+  position: relative;
+  overflow: hidden;
+}
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--spectrum);
+}
+.result-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; gap:16px; }
+.result-st { font-family: var(--mono); font-size: 1.214rem; font-weight: 600; color: var(--c-cyan); }
+.result-meta { font-family: var(--mono); font-size: 0.714rem; color: var(--text2); margin-top: 4px; }
+.conf-wrap { text-align: right; min-width: 80px; }
+.conf-pct { font-family: var(--mono); font-size: 1.429rem; font-weight: 600; }
+.conf-bar { height: 3px; background: var(--border2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 2px; background: var(--spectrum); transition: width .7s cubic-bezier(.4,0,.2,1); }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tag { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:3px; font-family:var(--mono); font-size: 0.714rem; background:var(--surf); border:1px solid var(--border2); color:var(--text2); }
+.tag.cat { border-color: var(--c-indigo); color: var(--c-indigo); }
+
+.pat-label { font-family:var(--mono); font-size: 0.823rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+.pat-list { display:flex; flex-wrap:wrap; gap:5px; }
+.pat-chip { font-family:var(--mono); font-size: 0.714rem; padding:2px 7px; background:rgba(91,108,249,.1); border:1px solid rgba(91,108,249,.25); border-radius:3px; color:var(--c-indigo); }
+.pat-chip-req { background:rgba(0,224,255,.08); border-color:rgba(0,224,255,.3); color:var(--c-teal); }
+
+.review-banner { display:flex; align-items:center; gap:8px; padding:9px 13px; background:rgba(245,200,66,.09); border:1px solid rgba(245,200,66,.3); border-radius:var(--r); margin-top:11px; font-family:var(--mono); font-size: 0.786rem; color:var(--c-amber); }
+
+/* ═══════════════════════════════════ SORTABLE COLUMNS */
+.th-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color .15s;
+}
+.th-sort:hover { color: var(--c-cyan); }
+.th-sort.asc::after  { content: ' ↑'; color: var(--c-cyan); }
+.th-sort.desc::after { content: ' ↓'; color: var(--c-cyan); }
+
+/* ═══════════════════════════════════ TABLES */
+.tbl-wrap { overflow-x: auto; }
+table { width:100%; border-collapse:collapse; font-size: 1rem; }
+th { text-align:left; font-family:var(--mono); font-size: 0.786rem; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); padding:7px 11px; border-bottom:1px solid var(--border); }
+td { padding:9px 11px; border-bottom:1px solid var(--border); color:var(--text2); font-family:var(--mono); vertical-align:middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+td.st { color: var(--c-teal); font-weight: 600; }
+td.file { color:var(--text); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ═══════════════════════════════════ BADGES */
+.badge { display:inline-block; padding:2px 7px; border-radius:3px; font-family:var(--mono); font-weight:500; }
+.badge-g { background:rgba(56,224,110,.12); color:var(--c-green); }
+.badge-y { background:rgba(245,200,66,.12); color:var(--c-amber); }
+.badge-r { background:rgba(255,64,96,.12);  color:var(--c-red);   }
+.badge-b { background:rgba(91,108,249,.12); color:var(--c-indigo); }
+.badge-c { background:rgba(0,196,232,.12);  color:var(--c-cyan);  }
+
+/* ═══════════════════════════════════ PROGRESS */
+.prog-track { background:var(--surf2); border-radius:2px; height:5px; overflow:hidden; margin:8px 0; }
+.prog-fill { height:100%; background:var(--spectrum); border-radius:2px; transition:width .4s; }
+
+/* ═══════════════════════════════════ BAR CHART */
+.bar-list { display:flex; flex-direction:column; gap:10px; }
+.bar-row { display:grid; grid-template-columns:110px 1fr 44px; align-items:center; gap:10px; }
+.bar-label { font-family:var(--mono); font-size: 0.786rem; color:var(--text2); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar-track { background:var(--surf2); border-radius:2px; height:7px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:2px; }
+.bar-count { font-family:var(--mono); font-size: 0.786rem; color:var(--text3); text-align:right; }
+
+/* Bar colors cycle through spectrum */
+.bar-fill:nth-child(1) { background: var(--c-violet); }
+
+/* ═══════════════════════════════════ QUEUE SAMPLE PRE */
+.queue-sample-summary {
+  font-family: var(--mono);
+  font-size: 0.714rem;
+  letter-spacing: .06em;
+  color: var(--text3);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  margin-bottom: 4px;
+  transition: color .15s;
+}
+.queue-sample-summary:hover { color: var(--c-cyan); }
+.queue-sample-summary::-webkit-details-marker { display: none; }
+.q-summary-icon {
+  font-size: 0.571rem;
+  transition: transform .2s;
+  display: inline-block;
+}
+details[open] .q-summary-icon { transform: rotate(90deg); }
+.queue-sample-pre {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-family: var(--mono);
+  font-size: 0.714rem;
+  color: var(--text2);
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 340px;
+  scroll-behavior: smooth;
+}
+.queue-sample-pre::-webkit-scrollbar,
+::-webkit-scrollbar { width: 6px; height: 6px; }
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Corner (where horizontal + vertical meet) */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Thumb */
+::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 10px;
+  transition: background .2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.queue-sample-pre::-webkit-scrollbar-thumb:hover { background: var(--c-cyan); }
+
+/* ═══════════════════════════════════ QUEUE */
+.q-item { background:var(--surf2); border:1px solid var(--border2); border-radius:var(--r); padding:14px 18px; margin-bottom:10px; }
+.q-filename { font-family:var(--mono); font-size: 0.786rem; color:var(--text); margin-bottom:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.q-guess { font-family:var(--mono); font-size: 0.786rem; color:var(--text2); margin-bottom:10px; }
+.q-resolve { display:flex; align-items:center; gap:8px; }
+
+/* ═══════════════════════════════════ SCAN */
+.scan-results-table { max-height:420px; overflow-y:auto; border-radius:var(--r); border:1px solid var(--border); }
+
+/* ═══════════════════════════════════ PATTERN EDITOR */
+.pat-editor { display:flex; flex-direction:column; gap:6px; }
+.pat-row { display:flex; align-items:center; gap:6px; }
+.pat-row .inp { flex:1; }
+.pat-req-cb { accent-color:var(--c-cyan); width:14px; height:14px; cursor:pointer; flex-shrink:0; }
+.pat-req-label { font-size: 0.786rem; color:var(--text3); white-space:nowrap; cursor:pointer; }
+.pat-row.is-required .inp { border-color:var(--c-cyan); background:rgba(0,229,176,.04); }
+
+/* ═══════════════════════════════════ MODALS */
+.modal-backdrop {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter: blur(4px);
+  z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  animation: fadeUp .15s ease;
+}
+.modal {
+  background:var(--surf);
+  border:1px solid var(--border2);
+  border-radius:var(--r);
+  padding:26px 28px;
+  width:min(660px, 88vw); max-width:94vw; max-height:88vh;
+  overflow-y:auto;
+  box-shadow:0 24px 72px rgba(0,0,0,.7);
+  position: relative;
+}
+.modal::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0;
+  height:2px;
+  background:var(--spectrum);
+  border-radius:var(--r) var(--r) 0 0;
+}
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-top:6px; }
+.modal-title { font-family:var(--display); font-size: 1.143rem; font-weight:700; letter-spacing:.06em; color:var(--text); }
+.modal-close { background:none; border:none; color:var(--text3); cursor:pointer; font-size: 1.286rem; line-height:1; transition:color .15s; }
+.modal-close:hover { color:var(--text); }
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
+
+/* ═══════════════════════════════════ EMPTY */
+.empty { text-align:center; padding:48px 24px; color:var(--text3); font-family:var(--mono); font-size: 0.857rem; }
+.empty-icon { font-size: 2.286rem; margin-bottom:10px; }
+
+/* ═══════════════════════════════════ SPINNER */
+.spin { display:inline-block; width:13px; height:13px; border:2px solid var(--border2); border-top-color:var(--c-cyan); border-radius:50%; animation:rot .7s linear infinite; vertical-align:middle; }
+@keyframes rot { to { transform:rotate(360deg); } }
+
+/* ═══════════════════════════════════ TOAST */
+#toasts { position:fixed; bottom:80px; right:22px; display:flex; flex-direction:column; gap:8px; z-index:9999; }
+.toast { padding:11px 16px; border-radius:var(--r); font-family:var(--mono); font-size: 0.786rem; max-width:340px; border:1px solid; animation:fadeUp .22s ease; position:relative; overflow:hidden; }
+.toast::before { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:var(--spectrum); }
+.toast-ok   { background:rgba(0,229,176,.09); border-color:var(--c-teal);  color:var(--c-teal);  }
+.toast-err  { background:rgba(255,64,96,.09);  border-color:var(--c-red);   color:var(--c-red);   }
+.toast-warn { background:rgba(245,200,66,.09); border-color:var(--c-amber); color:var(--c-amber); }
+
+/* ═══════════════════════════════════ DIR ITEMS */
+.dir-item { display:flex; align-items:center; gap:10px; padding:9px 13px; background:var(--surf2); border:1px solid var(--border2); border-radius:var(--r); margin-bottom:7px; font-family:var(--mono); font-size: 0.786rem; color:var(--text); }
+.dir-item .path { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text2); }
+
+/* ═══════════════════════════════════ LANDING ZONE CARDS */
+.zone-card {
+  background:var(--surf);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:16px 20px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.zone-icon { font-size: 1.571rem; flex-shrink:0; }
+.zone-name { font-family:var(--mono); font-size: 0.929rem; font-weight:600; color:var(--c-teal); }
+.zone-path { font-family:var(--mono); font-size: 0.714rem; color:var(--text3); margin-top:2px; }
+.zone-count { margin-left:auto; text-align:right; flex-shrink:0; }
+.zone-count-num { font-family:var(--mono); font-size: 1.429rem; font-weight:600; color:var(--text); }
+.zone-count-label { font-family:var(--mono); font-size: 0.64rem; color:var(--text3); text-transform:uppercase; letter-spacing:.08em; }
+.zone-latest { font-family:var(--mono); font-size: 0.64rem; color:var(--text3); }
+
+/* ═══════════════════════════════════ FOLDER BROWSER */
+.fbrowser {
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.fb-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surf);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.fb-path {
+  font-family: var(--mono);
+  font-size: 0.786rem;
+  color: var(--c-cyan);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-family: var(--mono);
+  font-size: 0.857rem;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+}
+.fb-item:hover { background: var(--surf3); color: var(--text); }
+.fb-item:last-child { border-bottom: none; }
+.fb-icon { flex-shrink: 0; font-size: 1.0rem; }
+.fb-drives { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+.fb-drive {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: var(--surf3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: 0.929rem;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.fb-drive:hover { border-color: var(--c-cyan); color: var(--c-cyan); }
+
+
+/* ══════════════════════════════════════ LENS */
+.lens-layout { display:flex; gap:16px; height:calc(100vh - 180px); }
+.lens-sidebar { width:240px; flex-shrink:0; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
+.lens-sidebar-title { font-family:var(--mono); font-size:0.75rem; color:var(--text3); letter-spacing:.08em; text-transform:uppercase; padding:4px 2px 8px; }
+.lens-session-item { background:var(--surf2); border:1px solid var(--border); border-radius:var(--r); padding:10px 12px; cursor:pointer; transition:border-color .15s; }
+.lens-session-item:hover { border-color:var(--border2); }
+.lens-session-item.active { border-color:var(--c-teal); background:rgba(0,224,255,.04); }
+.lens-session-st { font-family:var(--mono); font-size:0.8rem; color:var(--c-teal); font-weight:600; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lens-session-preview { font-size:0.75rem; color:var(--text2); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.4; }
+.lens-session-meta { font-size:0.7rem; color:var(--text3); margin-top:5px; }
+.lens-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+.lens-file-bar { background:var(--surf2); border:1px solid var(--border); border-radius:var(--r); padding:8px 14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex-shrink:0; }
+.lens-file-path { font-family:var(--mono); font-size:0.75rem; color:var(--c-teal); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lens-summary-label { font-family:var(--mono); font-size:0.7rem; color:var(--text3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; flex-shrink:0; }
+.lens-summary { background:var(--surf); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:10px; white-space:pre-wrap; font-family:var(--mono); font-size:0.85rem; line-height:1.6; color:var(--text); max-height:220px; overflow-y:auto; flex-shrink:0; }
+.lens-divider { border:none; border-top:1px solid var(--border); margin:0 0 10px; flex-shrink:0; }
+.lens-chat { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; margin-bottom:10px; padding-right:2px; min-height:0; }
+.lens-msg { max-width:90%; display:flex; flex-direction:column; }
+.lens-msg.user { align-self:flex-end; align-items:flex-end; }
+.lens-msg.assistant { align-self:flex-start; align-items:flex-start; }
+.lens-bubble { padding:10px 14px; border-radius:12px; font-size:0.85rem; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+.lens-msg.user .lens-bubble { background:var(--c-indigo); color:#fff; border-bottom-right-radius:3px; }
+.lens-msg.assistant .lens-bubble { background:var(--surf2); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:3px; }
+.lens-msg-meta { font-size:0.65rem; color:var(--text3); margin-top:3px; padding:0 4px; }
+.lens-input-row { display:flex; gap:8px; flex-shrink:0; }
+.lens-input-row .inp { flex:1; resize:none; min-height:38px; max-height:120px; overflow-y:auto; }
+.lens-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; color:var(--text3); font-family:var(--mono); text-align:center; gap:12px; }
+.lens-empty-icon { font-size:3rem; opacity:.25; }
+.lens-empty-title { font-size:1rem; color:var(--text2); }
+.lens-empty-sub { font-size:0.8rem; color:var(--text3); max-width:320px; line-height:1.6; }
+.lens-status-bar { display:flex; align-items:center; gap:8px; padding:5px 12px; border-radius:20px; font-size:0.75rem; font-family:var(--mono); flex-shrink:0; border:1px solid; }
+.lens-status-bar.ok  { background:rgba(56,224,110,.08); border:1px solid rgba(56,224,110,.2); color:var(--c-green); }
+.lens-status-bar.warn { background:rgba(245,200,66,.08); border:1px solid rgba(245,200,66,.2); color:var(--c-amber); }
+.lens-status-bar.err { background:rgba(255,64,96,.08); border:1px solid rgba(255,64,96,.2); color:var(--c-red); }
+.lens-thinking { display:flex; align-items:center; gap:6px; color:var(--text3); font-size:0.8rem; font-family:var(--mono); padding:6px 0; }
+.lens-dot { width:6px; height:6px; border-radius:50%; background:var(--c-teal); animation:lensdot 1.2s ease-in-out infinite; }
+.lens-dot:nth-child(2) { animation-delay:.2s; }
+.lens-dot:nth-child(3) { animation-delay:.4s; }
+@keyframes lensdot { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1.2)} }
+
+
+/* ── Lens sourcetype combobox ─────────────────────────────────────────────── */
+.lens-combo { position:relative; width:200px; flex-shrink:0; }
+.lens-combo-input { width:100%; box-sizing:border-box; }
+.lens-combo-list {
+  position:absolute; top:calc(100% + 2px); left:0; right:0; z-index:200;
+  background:var(--surf2); border:1px solid var(--border2); border-radius:var(--r);
+  max-height:220px; overflow-y:auto; display:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+}
+.lens-combo-list.open { display:block; }
+.lens-combo-item {
+  padding:7px 12px; cursor:pointer; font-family:var(--mono);
+  font-size:0.8rem; color:var(--text); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.lens-combo-item:hover, .lens-combo-item.active { background:rgba(0,224,255,.1); color:var(--c-teal); }
+.lens-combo-empty { padding:8px 12px; font-size:0.8rem; color:var(--text3); font-family:var(--mono); }
+.ep-help { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--surf2); border:1px solid var(--border2); color:var(--text3); font-size:0.65rem; cursor:pointer; font-family:var(--mono); transition:all .15s; flex-shrink:0; }
+.ep-help:hover { border-color:var(--c-teal); color:var(--c-teal); }
+.ep-help-box { background:var(--surf2); border:1px solid var(--border2); border-radius:var(--r); padding:12px 14px; font-size:0.8rem; font-family:var(--mono); color:var(--text2); line-height:1.7; margin-top:6px; }
+.ep-help-box strong { color:var(--text); }
+/* ══════════════════════════════════════ CLEANING PAGE */
+.cl-mode-badge { display:inline-block; padding:2px 8px; border-radius:3px; font-family:var(--mono); font-size:1rem; font-weight:600; }
+.cl-mode-line        { background:rgba(56,224,110,.12);  border:1px solid rgba(56,224,110,.25);  color:var(--c-green); }
+.cl-mode-multiline   { background:rgba(91,108,249,.12);  border:1px solid rgba(91,108,249,.25);  color:var(--c-indigo); }
+.cl-mode-passthrough { background:rgba(255,255,255,.06); border:1px solid var(--border);          color:var(--text3); }
+.cl-mode-auto        { background:rgba(0,224,255,.08);   border:1px solid rgba(0,224,255,.2);     color:var(--c-teal); }
+.cl-filter-text { font-family:var(--mono); font-size:1rem; color:var(--text2); max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-row-edit { opacity:1; }
+.cl-stats { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+.cl-stat { background:var(--surf2); border:1px solid var(--border); border-radius:var(--r); padding:10px 18px; font-family:var(--mono); }
+.cl-stat-num { font-size:1.5rem; font-weight:700; color:var(--text); line-height:1; }
+.cl-stat-lbl { font-size:0.7rem; color:var(--text3); margin-top:3px; text-transform:uppercase; letter-spacing:.06em; }
+.cl-inline-edit { background:var(--surf2); border:1px solid var(--border2); border-radius:var(--r); padding:14px 16px; margin-top:6px; }
+.cl-test-clean { color:var(--c-green); font-family:var(--mono); font-size:0.78rem; }
+.cl-test-noise { color:var(--c-red); font-family:var(--mono); font-size:0.78rem; opacity:.8; }
+.cl-test-label { color:var(--text3); font-family:var(--mono); font-size:0.7rem; margin-bottom:4px; }
+.cl-accordion-row td { padding:0 !important; }
+.cl-accordion-row { border-left:3px solid var(--c-teal); }
+.cl-toggle { display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:var(--mono); font-size:0.85rem; }
+.cl-toggle-track { width:36px; height:20px; border-radius:10px; background:var(--border2); position:relative; transition:background .2s; flex-shrink:0; }
+.cl-toggle-track.on { background:var(--c-green); }
+.cl-toggle-thumb { position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#fff; transition:left .2s; }
+.cl-toggle-track.on .cl-toggle-thumb { left:19px; }
+.cl-disabled-row td { opacity:0.4; }
+.cl-disabled-row td:last-child { opacity:1; }
+
+.ep-help-box code { background:rgba(0,224,255,.08); border:1px solid rgba(0,224,255,.15); border-radius:3px; padding:1px 5px; color:var(--c-teal); font-size:0.8rem; }
+.ep-test-clean { color:var(--c-green); }
+.ep-test-noise { color:var(--c-red); opacity:.7; }
+.ep-test-label { color:var(--text3); font-size:0.7rem; margin-bottom:3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER -->
+<header>
+  <div class="logo">
+    <!-- Prism geometric mark -->
+    <svg class="prism-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#9b5de5"/>
+          <stop offset="25%"  stop-color="#5b6cf9"/>
+          <stop offset="50%"  stop-color="#00c4e8"/>
+          <stop offset="75%"  stop-color="#00e5b0"/>
+          <stop offset="100%" stop-color="#38e06e"/>
+        </linearGradient>
+        <linearGradient id="pg2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#9b5de5" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#38e06e" stop-opacity=".5"/>
+        </linearGradient>
+      </defs>
+      <!-- Prism triangle -->
+      <polygon points="18,3 33,30 3,30" fill="none" stroke="url(#pg)" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Refracted beam lines emerging from right side -->
+      <line x1="26" y1="23" x2="35" y2="20" stroke="#9b5de5" stroke-width="1.2" opacity=".9"/>
+      <line x1="27" y1="25" x2="35" y2="24" stroke="#5b6cf9" stroke-width="1.2" opacity=".9"/>
+      <line x1="27.5" y1="27" x2="35" y2="27.5" stroke="#00c4e8" stroke-width="1.2" opacity=".9"/>
+      <line x1="27" y1="29" x2="35" y2="31" stroke="#00e5b0" stroke-width="1.2" opacity=".9"/>
+      <!-- Incoming beam -->
+      <line x1="1" y1="17" x2="13" y2="22" stroke="url(#pg2)" stroke-width="1.5" opacity=".7"/>
+    </svg>
+    <div class="logo-text">
+      <div class="logo-name">PRISM</div>
+      <div class="logo-tag">Pattern Recognition &amp; Intelligent Structure Mining</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="watcher-btn" id="watchBtn" onclick="toggleWatcher()">
+      <div class="watcher-dot"></div>
+      <span id="watchLabel">WATCHER OFF</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ SHELL -->
+<div class="shell">
+<nav>
+  <div class="nav-section">Classify</div>
+  <a class="active" data-p="classify" onclick="go('classify',this)"><span class="nav-icon">◈</span>Single File</a>
+  <a data-p="bulk" onclick="go('bulk',this)"><span class="nav-icon">▦</span>Bulk Scan</a>
+
+  <div class="nav-section">Monitor</div>
+  <a data-p="dashboard" onclick="go('dashboard',this)"><span class="nav-icon">⬡</span>Dashboard</a>
+  <a data-p="queue" onclick="go('queue',this)"><span class="nav-icon">⚠</span>Review Queue<span class="nav-badge" id="qbadge" style="display:none"></span></a>
+  <a data-p="landing" onclick="go('landing',this)"><span class="nav-icon">⬢</span>Landing Zones</a>
+
+  <div class="nav-section">Analyze</div>
+  <a data-p="lens" onclick="go('lens',this)"><span class="nav-icon">◎</span>Lens</a>
+
+  <div class="nav-section">Configure</div>
+  <a data-p="signatures" onclick="go('signatures',this)"><span class="nav-icon">≋</span>Signatures</a>
+  <a data-p="cleaning" onclick="go('cleaning',this)"><span class="nav-icon">⌁</span>Cleaning Rules</a>
+  <a data-p="watchdirs" onclick="go('watchdirs',this)"><span class="nav-icon">⊙</span>Watched Dirs</a>
+</nav>
+
+<main>
+
+<!-- ════ CLASSIFY ════════════════════════════════════════════════════ -->
+<div class="page active" id="page-classify">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Single File</div><div class="sub">Classify a file or paste raw log lines to refract into structure</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Upload File</div>
+      <div class="drop" id="dropZ">
+        <input type="file" id="fileIn" multiple onchange="handleFiles(this.files)">
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">Drop log file here</div>
+        <div class="drop-sub">or <span>click to browse</span></div>
+      </div>
+      <div class="toggle-row">
+        <label class="toggle"><input type="checkbox" id="routeToggle" checked><span class="toggle-slider"></span></label>
+        Route to landing zone after classifying
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Paste Log Lines</div>
+      <textarea class="inp" id="pasteArea" style="min-height:138px" placeholder="Paste a few log lines here…&#10;&#10;Mar 15 10:22:01 192.168.1.1 %ASA-6-302013: Built inbound TCP..."></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="classifyText()">◈ Refract Text</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('pasteArea').value=''">Clear</button>
+      </div>
+    </div>
+  </div>
+  <div id="clfResults"></div>
+</div>
+
+<!-- ════ BULK SCAN ══════════════════════════════════════════════════ -->
+<div class="page" id="page-bulk">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Bulk Scan</div><div class="sub">Refract thousands of log files from a directory</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Directory</div>
+    <div class="frow-2">
+      <div class="frow">
+        <label class="lbl">Path</label>
+        <div style="display:flex;gap:6px">
+          <input class="inp" id="scanDir" placeholder="/var/log/collected" style="flex:1">
+          <button class="btn btn-secondary" onclick="openBrowser('scanDir')" title="Browse">📂</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <div style="flex:1">
+          <label class="lbl">&nbsp;</label>
+          <div class="toggle-row" style="margin-top:0">
+            <label class="toggle"><input type="checkbox" id="scanRecursive" checked><span class="toggle-slider"></span></label>
+            Include subdirectories
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toggle-row" style="margin-bottom:16px">
+      <label class="toggle"><input type="checkbox" id="scanRoute" checked><span class="toggle-slider"></span></label>
+      Route files to landing zones automatically
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" id="scanBtn" onclick="startScan()">▦ Start Scan</button>
+      <button class="btn btn-secondary" onclick="addScanDirToWatched()">+ Add to Watched Dirs</button>
+    </div>
+  </div>
+
+  <div class="card" id="scanProgress" style="display:none">
+    <div class="card-title">Progress</div>
+    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.78rem;color:var(--text2);margin-bottom:5px">
+      <span id="scanProgressLabel">Starting…</span>
+      <span id="scanProgressPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="scanBar" style="width:0%"></div></div>
+    <div style="display:flex;gap:18px;margin-top:10px;font-family:var(--mono);font-size:0.65rem;color:var(--text2)">
+      <span style="color:var(--c-teal)">✓ <span id="scanDone">0</span> done</span>
+      <span style="color:var(--c-red)">✗ <span id="scanErrors">0</span> errors</span>
+      <span>▦ <span id="scanTotal">0</span> total</span>
+    </div>
+  </div>
+
+  <div class="card" id="scanResultsCard" style="display:none">
+    <div class="card-title">Results</div>
+    <div style="display:flex;gap:14px;margin-bottom:16px">
+      <div class="stat" style="flex:1"><div class="stat-label">Classified</div><div class="stat-value stat-t" id="sr-classified">0</div></div>
+      <div class="stat" style="flex:1"><div class="stat-label">Review Queue</div><div class="stat-value stat-a" id="sr-review">0</div></div>
+      <div class="stat" style="flex:1"><div class="stat-label">Errors</div><div class="stat-value stat-r" id="sr-errors">0</div></div>
+      <div class="stat" style="flex:1"><div class="stat-label">Unique Types</div><div class="stat-value stat-b" id="sr-types">0</div></div>
+    </div>
+    <div class="scan-results-table tbl-wrap">
+      <table><thead><tr><th>File</th><th>Sourcetype</th><th>Confidence</th><th>Destination</th></tr></thead>
+      <tbody id="scanResultBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DASHBOARD ══════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Dashboard</div><div class="sub">Classification activity across the spectrum</div></div>
+    <div class="ph-right"><button class="btn btn-secondary" onclick="loadDashboard()">↻ Refresh</button></div>
+  </div>
+  <div class="g4" style="margin-bottom:18px">
+    <div class="stat"><div class="stat-label">Files Today</div><div class="stat-value stat-c" id="d-total">—</div></div>
+    <div class="stat"><div class="stat-label">Sourcetypes</div><div class="stat-value stat-b" id="d-types">—</div></div>
+    <div class="stat"><div class="stat-label">Review Queue</div><div class="stat-value stat-a" id="d-review">—</div></div>
+    <div class="stat"><div class="stat-label">Signatures</div><div class="stat-value stat-g" id="d-sigs">—</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="card-title">By Category</div><div class="bar-list" id="d-cats"><div class="empty"><div class="empty-icon">⬡</div>No data yet</div></div></div>
+    <div class="card"><div class="card-title">Top Sourcetypes</div><div id="d-sts"><div class="empty"><div class="empty-icon">⬡</div>No data yet</div></div></div>
+  </div>
+</div>
+
+<!-- ════ REVIEW QUEUE ══════════════════════════════════════════════ -->
+<div class="page" id="page-queue">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Review Queue</div><div class="sub">Logs PRISM could not classify — assign a sourcetype to train the engine</div></div>
+    <div class="ph-right" style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-secondary" onclick="loadQueue()">↻ Refresh</button>
+        <div style="position:relative;display:inline-block" id="clearQueueWrap">
+          <button class="btn btn-danger btn-sm" onclick="toggleClearMenu()">🗑 Clear ▾</button>
+          <div id="clearQueueMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);min-width:230px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.4)">
+            <div style="padding:6px 0">
+              <button class="clear-menu-item" onclick="clearQueue(false)">🗑 Remove from queue only</button>
+              <div style="height:1px;background:var(--border);margin:4px 0"></div>
+              <button class="clear-menu-item" style="color:#ff6b6b" onclick="clearQueue(true)">⚠ Remove from queue + delete files</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  <div id="queueList"></div>
+</div>
+
+<!-- ════ LANDING ZONES ══════════════════════════════════════════════ -->
+<div class="page" id="page-landing">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Landing Zones</div><div class="sub">Files routed into sourcetype-named directories for Cribl pickup</div></div>
+    <div class="ph-right">
+      <button class="btn btn-secondary" onclick="loadLanding()">↻ Refresh</button>
+      <button class="btn btn-primary" onclick="showModal('modalLanding');document.getElementById('newLandingName').value=''">+ New Zone</button>
+    </div>
+  </div>
+  <div id="landingContent"></div>
+</div>
+
+<!-- ════ SIGNATURES ══════════════════════════════════════════════════ -->
+<div class="page" id="page-signatures">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Signatures</div><div class="sub">Classification rules — view, edit patterns, or add new ones</div></div>
+    <div class="ph-right">
+      <button class="btn btn-secondary" onclick="loadSignatures()">↻ Reload</button>
+      <button class="btn btn-primary" onclick="showAddSigModal()">+ New Signature</button>
+    </div>
+  </div>
+  <!-- ── Confidence Scale ─────────────────────────────────────────────── -->
+  <div class="card" style="margin-bottom:16px;text-align:center">
+    <div style="font-size:1rem;color:var(--text3);margin-bottom:0.5em;letter-spacing:.05em;text-transform:uppercase">Confidence Scale</div>
+    <div style="display:flex;align-items:center;gap:0;margin:0 auto;max-width:600px;border-radius:6px;overflow:hidden;height:22px">
+      <div style="flex:1;background:#ff4060;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1rem;color:#fff;font-weight:600">0–40%</span>
+      </div>
+      <div style="flex:1;background:#f5c842;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1rem;color:#000;font-weight:600">40–60%</span>
+      </div>
+      <div style="flex:1;background:#f5a623;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1rem;color:#000;font-weight:600">60–75%</span>
+      </div>
+      <div style="flex:1;background:var(--c-cyan);display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1rem;color:#000;font-weight:600">75–90%</span>
+      </div>
+      <div style="flex:1;background:var(--c-green);display:flex;align-items:center;justify-content:center">
+        <span style="font-size:1rem;color:#000;font-weight:600">90–100%</span>
+      </div>
+    </div>
+    <div style="display:flex;max-width:700px;margin:0.375em auto 0;gap:0">
+      <div style="flex:1;font-size:1rem;color:var(--text3);text-align:center">Unknown</div>
+      <div style="flex:1;font-size:1rem;color:var(--text3);text-align:center">Review Queue</div>
+      <div style="flex:1;font-size:1rem;color:var(--text3);text-align:center">Low Confidence</div>
+      <div style="flex:1;font-size:1rem;color:var(--text3);text-align:center">Good</div>
+      <div style="flex:1;font-size:1rem;color:var(--text3);text-align:center">High Confidence</div>
+    </div>
+    <div style="margin-top:10px;font-size:1rem;color:var(--text3)">
+      Below <span style="color:#f5c842;font-weight:600">60%</span> → sent to Review Queue &nbsp;·&nbsp;
+      Required patterns contribute <span style="color:var(--c-cyan);font-weight:600">80%</span> of score &nbsp;·&nbsp;
+      Optional patterns contribute <span style="color:var(--c-cyan);font-weight:600">20%</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-family:var(--mono);font-size:0.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);font-size:1rem">Signatures</span>
+        <span id="sigTotalBadge" style="background:rgba(56,224,110,.15);color:var(--c-green);font-family:var(--mono);font-size:1rem;padding:2px 10px;border-radius:3px;border:1px solid rgba(56,224,110,.3)"></span>
+        <span id="sigFilteredBadge" style="font-family:var(--mono);font-size:1rem;color:var(--text3)"></span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+      <input class="inp" id="sigSearch" placeholder="Sourcetype, vendor, product…" oninput="filterSigs()">
+      <select class="inp" id="sigCat" onchange="filterSigs()">
+        <option value="">All categories</option>
+      </select>
+      <div style="display:flex;gap:6px">
+        <select class="inp" id="sigConfMin" onchange="filterSigs()" title="Min confidence">
+          <option value="0">Any confidence</option>
+          <option value="0.9">≥ 90%</option>
+          <option value="0.85">≥ 85%</option>
+          <option value="0.7">≥ 70%</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="clearSigFilters()" title="Clear filters">✕</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><div id="sigTable"></div></div>
+  </div>
+</div>
+
+<!-- ════ LENS ═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-lens">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="title">Lens</div>
+      <div class="sub">AI-powered log analysis — summarize and interrogate classified files</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div id="lensStatusBar" class="lens-status-bar" style="display:none"></div>
+      <button class="btn btn-secondary btn-sm" onclick="lensStartFreeChat()" title="Chat with Mistral without a log file">Chat</button>
+      <button class="btn btn-primary btn-sm" onclick="lensNewSession()" title="Analyze a new log file">+ New Analysis</button>
+    </div>
+  </div>
+
+  <div class="lens-layout">
+    <!-- Sidebar: session history -->
+    <div class="lens-sidebar">
+      <div class="lens-sidebar-title">Recent Sessions</div>
+      <div id="lensSessionList"><div class="empty" style="padding:12px 0;font-size:0.8rem">No sessions yet</div></div>
+    </div>
+
+    <!-- Main area -->
+    <div class="lens-main" id="lensMain">
+      <!-- Empty state -->
+      <div class="lens-empty" id="lensEmpty">
+        <div class="lens-empty-icon">◎</div>
+        <div class="lens-empty-title">No file loaded</div>
+        <div class="lens-empty-sub">Click <strong>Analyze</strong> on any classified file, review queue item, or landing zone file — or enter a path below to start a new session.</div>
+        <!-- Input tabs -->
+        <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:8px">
+          <button id="lensTabPath" class="btn" style="border-radius:0;border:none;padding:6px 14px;background:var(--c-teal);color:#000;font-size:0.8rem" onclick="lensSetTab('path')">Path</button>
+          <button id="lensTabFile" class="btn" style="border-radius:0;border:none;padding:6px 14px;background:var(--surf2);color:var(--text2);font-size:0.8rem" onclick="lensSetTab('file')">Upload File</button>
+          <button id="lensTabDir"  class="btn" style="border-radius:0;border:none;padding:6px 14px;background:var(--surf2);color:var(--text2);font-size:0.8rem" onclick="lensSetTab('dir')">Directory</button>
+        </div>
+
+        <!-- Path input -->
+        <div id="lensInputPath" style="display:flex;gap:8px;width:100%;max-width:560px;margin-top:8px">
+          <input id="lensManualPath" class="inp" placeholder="/home/advan/prism/landing/azure_audit/file.log" style="flex:1">
+          <div class="lens-combo" id="lensComboManual">
+            <input id="lensManualST" class="inp lens-combo-input" placeholder="Sourcetype (optional)"
+              autocomplete="off"
+              oninput="lensComboFilter('lensComboManual','lensManualST')"
+              onfocus="lensComboOpen('lensComboManual','lensManualST')"
+              onkeydown="lensComboKey(event,'lensComboManual','lensManualST')">
+            <div class="lens-combo-list" id="lensComboManualList"></div>
+          </div>
+          <button class="btn btn-primary" onclick="lensAnalyzeManual()">Analyze</button>
+        </div>
+
+        <!-- File upload -->
+        <div id="lensInputFile" style="display:none;flex-direction:column;gap:8px;width:100%;max-width:560px;margin-top:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="lensFileInput" type="file" class="inp" style="flex:1">
+            <div class="lens-combo" id="lensComboFile">
+              <input id="lensFileST" class="inp lens-combo-input" placeholder="Sourcetype (optional)"
+                autocomplete="off"
+                oninput="lensComboFilter('lensComboFile','lensFileST')"
+                onfocus="lensComboOpen('lensComboFile','lensFileST')"
+                onkeydown="lensComboKey(event,'lensComboFile','lensFileST')">
+              <div class="lens-combo-list" id="lensComboFileList"></div>
+            </div>
+            <button class="btn btn-primary" onclick="lensAnalyzeUpload()">Analyze</button>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text3)">File is uploaded, classified, and analyzed in one step</div>
+        </div>
+
+        <!-- Directory scan -->
+        <div id="lensInputDir" style="display:none;flex-direction:column;gap:8px;width:100%;max-width:560px;margin-top:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="lensDirPath" class="inp" placeholder="/home/advan/prism/landing/azure_audit" style="flex:1">
+            <button class="btn btn-primary" onclick="lensAnalyzeDir()">Scan All</button>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text3)">Analyzes every file in the directory — results appear as individual sessions in the sidebar</div>
+        </div>
+        <!-- Free Chat panel -->
+        <div id="lensInputChat" style="display:none;flex-direction:column;gap:8px;width:100%;max-width:560px;margin-top:8px">
+          <div style="font-size:0.85rem;color:var(--text2);text-align:center;font-family:var(--mono)">
+            Chat directly with <span style="color:var(--c-teal)" id="lensFreeChatModel">Mistral</span> — no log file required
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="lensStartFreeChat()">Start Chat</button>
+        </div>
+      </div>
+
+      <!-- Active session -->
+      <div id="lensSession" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden">
+        <div class="lens-file-bar" id="lensFileBar">
+          <span class="lens-file-path" id="lensFilePath"></span>
+          <span class="badge badge-b" id="lensSourcetype" style="flex-shrink:0"></span>
+          <span style="font-size:0.7rem;color:var(--text3);flex-shrink:0" id="lensSessionTime"></span>
+          <button class="btn btn-secondary btn-sm" onclick="lensDeleteSession()" style="margin-left:auto">Delete</button>
+        </div>
+
+        <div class="lens-summary-label">Initial Analysis</div>
+        <div class="lens-summary" id="lensSummary"></div>
+
+        <hr class="lens-divider">
+
+        <div class="lens-chat" id="lensChat"></div>
+
+        <div class="lens-input-row">
+          <textarea id="lensChatInput" class="inp" rows="1"
+            placeholder="Ask a question about this log file..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();lensSendChat()}"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+          <button class="btn btn-primary" id="lensSendBtn" onclick="lensSendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CLEANING RULES ══════════════════════════════════════════════════ -->
+<div class="page" id="page-cleaning">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="title">Cleaning Rules</div>
+      <div class="sub">Control how PRISM strips dirty or non-conforming content before routing files to landing zones &nbsp;·&nbsp; <span id="clCount" style="color:var(--text3)"></span></div>
+    </div>
+
+  </div>
+
+  <!-- Summary stats -->
+  <div class="cl-stats" id="clStats"></div>
+
+  <!-- How cleaning works explainer -->
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div class="card-title" style="margin-bottom:0">How It Works</div>
+      <button class="btn btn-secondary btn-sm" onclick="toggleClExplainer()" id="clExplainerBtn">Show</button>
+    </div>
+    <div id="clExplainer" style="display:none">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;font-family:var(--mono);font-size:0.8rem;line-height:1.7">
+        <div>
+          <div style="color:var(--c-teal);font-weight:600;margin-bottom:4px">⌁ line</div>
+          Each line is one event. Lines matching the <strong>Line Filter</strong> regex are kept. Everything else — banners, headers, separators — goes to a <code>.noise.log</code> sidecar file alongside the clean output in the landing zone.
+          <div style="margin-top:6px;color:var(--text3)">Examples: Cisco ASA, PAN CSV, Linux syslog, CEF, LEEF, auditd</div>
+        </div>
+        <div>
+          <div style="color:var(--c-indigo);font-weight:600;margin-bottom:4px">⌁ multiline</div>
+          Events span multiple lines. PRISM extracts complete event blocks and strips everything outside them. Six sub-modes: <strong>json_lines</strong>, <strong>json_object</strong>, <strong>xml_event</strong>, <strong>zeek_tsv</strong>, <strong>iis</strong>, <strong>csv_with_header</strong>.
+          <div style="margin-top:6px;color:var(--text3)">Examples: WinEvent XML, CloudTrail JSON, Suricata EVE, Zeek TSV</div>
+        </div>
+        <div>
+          <div style="color:var(--text3);font-weight:600;margin-bottom:4px">⌁ passthrough</div>
+          File is routed as-is. No cleaning applied. Use when no reliable filter exists.
+        </div>
+        <div>
+          <div style="color:var(--c-cyan);font-weight:600;margin-bottom:4px">⌁ auto</div>
+          PRISM derives the mode automatically from the signature's <strong>required_patterns</strong> at classification time. No manual config needed. This is the default for all signatures.
+          <div style="margin-top:6px;color:var(--text3)">Override by setting an explicit Filter Mode in the signature.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(0,224,255,.05);border:1px solid rgba(0,224,255,.15);border-radius:var(--r);font-family:var(--mono);font-size:0.78rem;color:var(--text2)">
+        💡 <strong>Noise files</strong> — stripped lines are never deleted permanently. They are written to <code>filename.noise.log</code> in the same landing zone folder as the clean file. You can review, reprocess, or delete them at any time.
+      </div>
+    </div>
+  </div>
+
+  <!-- Search + filter bar -->
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+    <input id="clSearch" class="inp" placeholder="Filter sourcetype, category…" style="width:260px" oninput="filterCleaning()">
+    <select id="clModeFilter" class="inp" style="width:170px" onchange="filterCleaning()">
+      <option value="">All modes</option>
+      <option value="line">line</option>
+      <option value="multiline">multiline</option>
+      <option value="passthrough">passthrough</option>
+      <option value="auto">auto</option>
+    </select>
+  </div>
+
+  <!-- Cleaning rules table -->
+  <div class="card" style="padding:0">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th onclick="sortCleaning('sourcetype')" class="th-sort">Sourcetype</th>
+          <th onclick="sortCleaning('category')"   class="th-sort">Category</th>
+          <th onclick="sortCleaning('mode')"        class="th-sort">Mode</th>
+          <th>Line Filter / Multiline Mode</th>
+          <th>Source</th>
+          <th style="text-align:center">Enabled</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="clTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ WATCHED DIRS ══════════════════════════════════════════════ -->
+<div class="page" id="page-watchdirs">
+  <div class="ph">
+    <div class="ph-left"><div class="title">Watched Dirs</div><div class="sub">Auto-classify files dropped into these folders when the watcher is ON</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Add Directory</div>
+    <div style="display:flex;gap:8px">
+      <input class="inp" id="newWatchDir" placeholder="/var/log/incoming" style="flex:1">
+      <button class="btn btn-secondary" onclick="openBrowser('newWatchDir')" title="Browse">📂</button>
+      <button class="btn btn-primary" onclick="addWatchDir()">+ Add</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Monitored Directories</div>
+    <div id="watchDirList"><div class="empty"><div class="empty-icon">⊙</div>No directories added yet</div></div>
+  </div>
+</div>
+
+</main>
+</div><!-- .shell -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════════════════ -->
+
+<!-- Add Landing Zone -->
+<div id="modalLanding" style="display:none">
+  <div class="modal-backdrop" onclick="closeModal('modalLanding')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">New Landing Zone</div>
+        <button class="modal-close" onclick="closeModal('modalLanding')">✕</button>
+      </div>
+      <div class="frow">
+        <label class="lbl">Directory Name</label>
+        <input class="inp" id="newLandingName" placeholder="e.g. custom_firewall">
+        <div style="font-family:var(--mono);font-size:1rem;color:var(--text3);margin-top:6px">Creates a new subfolder inside the landing/ directory. Files can be manually routed here or via the Signatures category.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalLanding')">Cancel</button>
+        <button class="btn btn-primary" onclick="addLandingZone()">Create Zone</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Signature -->
+<div id="modalAddSig" style="display:none">
+  <div class="modal-backdrop" onclick="closeModal('modalAddSig')">
+    <div class="modal" onclick="event.stopPropagation()" style="width:700px">
+      <div class="modal-header">
+        <div class="modal-title">New Signature</div>
+        <button class="modal-close" onclick="closeModal('modalAddSig')">✕</button>
+      </div>
+      <div class="frow-2">
+        <div class="frow"><label class="lbl">Sourcetype *</label><input class="inp" id="ns-sourcetype" placeholder="e.g. cisco:ios"></div>
+        <div class="frow"><label class="lbl">Category *</label>
+          <select class="inp" id="ns-category">
+            <option value="windows">windows</option><option value="cisco">cisco</option>
+            <option value="linux">linux</option><option value="network" selected>network</option>
+            <option value="security">security</option><option value="endpoint">endpoint</option>
+            <option value="cloud">cloud</option><option value="database">database</option>
+            <option value="email">email</option><option value="web">web</option>
+            <option value="ot">ot</option><option value="storage">storage</option>
+            <option value="unknown">unknown</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow-2">
+        <div class="frow"><label class="lbl">Vendor *</label><input class="inp" id="ns-vendor" placeholder="e.g. Cisco"></div>
+        <div class="frow"><label class="lbl">Product *</label><input class="inp" id="ns-product" placeholder="e.g. IOS/IOS-XE"></div>
+      </div>
+      <div class="frow-3">
+        <div class="frow"><label class="lbl">Confidence (0–1)</label><input class="inp" id="ns-confidence" type="number" min="0.1" max="1" step="0.05" value="0.90"></div>
+        <div class="frow"><label class="lbl">Min Pattern Matches</label><input class="inp" id="ns-minmatches" type="number" min="1" value="1"></div>
+        <div class="frow" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <div class="toggle-row" style="margin-top:0"><label class="toggle"><input type="checkbox" id="ns-filelevel"><span class="toggle-slider"></span></label>File-level match</div>
+        </div>
+      </div>
+      <div class="frow"><label class="lbl">Header Match (optional — checked against first 5 lines only)</label><input class="inp" id="ns-header" placeholder="e.g. ^CEF:"></div>
+      <div class="frow">
+        <label class="lbl">Line Patterns * (one per line — regex)</label>
+        <div class="pat-editor" id="ns-patterns"></div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:7px" onclick="addPatRow('ns-patterns')">+ Add Pattern</button>
+      </div>
+      <div class="frow">
+        <label class="lbl">Exclude Patterns (optional)</label>
+        <div class="pat-editor" id="ns-excludes"></div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:7px" onclick="addPatRow('ns-excludes','Exclude pattern…')">+ Add Exclude</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalAddSig')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitNewSig()">Save Signature</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Patterns -->
+<div id="modalEditPat" style="display:none">
+  <div class="modal-backdrop" onclick="closeModal('modalEditPat')">
+    <div class="modal" onclick="event.stopPropagation()" style="width:min(680px, 90vw)">
+      <div class="modal-header">
+        <div class="modal-title" id="ep-title">Edit Patterns</div>
+        <button class="modal-close" onclick="closeModal('modalEditPat')">✕</button>
+      </div>
+      <div style="margin-bottom:14px;font-family:var(--mono);font-size:0.72rem;color:var(--text2)">
+        Vendor: <span id="ep-vendor" style="color:var(--text)"></span> &nbsp;·&nbsp; Product: <span id="ep-product" style="color:var(--text)"></span>
+      </div>
+      <div class="frow">
+        <label class="lbl" style="display:flex;align-items:center;gap:8px">
+          Patterns
+          <span style="font-size:1rem;color:var(--text3);font-weight:400">— check ✓ to make a pattern required (must match)</span>
+        </label>
+        <div class="pat-editor" id="ep-patterns"></div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:7px" onclick="addPatRow('ep-patterns')">+ Add Pattern</button>
+      </div>
+      <div class="frow" style="margin-top:10px">
+        <label class="lbl">Min Optional Matches <span style="font-size:1rem;color:var(--text3)">(unchecked patterns)</span></label>
+        <input class="inp" id="ep-minmatches" type="number" min="1" style="max-width:100px">
+      </div>
+      <!-- ── Cleaning Config ─────────────────────────────────────── -->
+            <div class="modal-footer">
+        <button class="btn btn-danger" style="margin-right:auto" onclick="deleteSig()">Delete Signature</button>
+        <button class="btn btn-secondary" onclick="closeModal('modalEditPat')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePatterns()">Save Patterns</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Cleaning Rule Modal -->
+<div id="modalCleaningEdit" style="display:none">
+  <div class="modal-backdrop" onclick="closeClEdit()">
+    <div class="modal" onclick="event.stopPropagation()" style="width:min(720px,92vw)">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="clEditTitle">Edit Cleaning Rule</div>
+          <div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);margin-top:3px" id="clEditSubtitle"></div>
+        </div>
+        <button class="modal-close" onclick="closeClEdit()">✕</button>
+      </div>
+
+      <!-- Filter Mode -->
+      <div class="frow" style="margin-bottom:14px">
+        <label class="lbl">Filter Mode</label>
+        <select id="clEditMode" class="inp" onchange="clEditOnModeChange()">
+          <option value="">Auto — derive from required patterns (recommended)</option>
+          <option value="line">line — one event per line</option>
+          <option value="multiline">multiline — events span multiple lines</option>
+          <option value="passthrough">passthrough — no cleaning applied</option>
+        </select>
+        <div style="margin-top:6px;font-family:var(--mono);font-size:0.78rem;color:var(--text3);line-height:1.6;padding:8px 12px;background:var(--surf2);border-radius:var(--r)" id="clModeHintBox"></div>
+      </div>
+
+      <!-- Line Filter -->
+      <div class="frow" id="clEditFilterSection" style="margin-bottom:14px">
+        <label class="lbl">Line Filter <span style="color:var(--text3);font-weight:400;font-size:0.85em">(regex)</span></label>
+        <input id="clEditFilter" class="inp" style="font-family:var(--mono)"
+          placeholder="Leave blank to auto-derive from required patterns"
+          oninput="clRunTest()">
+        <div style="margin-top:5px;font-size:0.78rem;color:var(--text3);font-family:var(--mono)" id="clEffFilterHint"></div>
+      </div>
+
+      <!-- Multiline Mode -->
+      <div class="frow" id="clEditMMSection" style="display:none;margin-bottom:14px">
+        <label class="lbl">Multiline Mode</label>
+        <select id="clEditMultilineMode" class="inp">
+          <option value="">Auto</option>
+          <option value="json_lines">json_lines — one JSON object per line (NDJSON)</option>
+          <option value="json_object">json_object — JSON objects spanning multiple lines</option>
+          <option value="xml_event">xml_event — XML event blocks (WinEvent, EVTX)</option>
+          <option value="zeek_tsv">zeek_tsv — Zeek/Bro TSV with # headers</option>
+          <option value="iis">iis — IIS W3C log format</option>
+          <option value="csv_with_header">csv_with_header — CSV with a header row</option>
+        </select>
+        <div style="margin-top:5px;font-size:0.78rem;color:var(--text3);font-family:var(--mono)" id="clEffMMHint"></div>
+      </div>
+
+      <!-- Live Test -->
+      <div class="frow" style="margin-bottom:4px">
+        <label class="lbl">Live Test <span style="color:var(--text3);font-weight:400">— paste sample lines to verify your filter</span></label>
+        <textarea id="clEditTestInput" class="inp" rows="4"
+          placeholder="Paste a few sample log lines here — results update as you type…"
+          style="font-family:var(--mono);font-size:0.82rem;resize:vertical"
+          oninput="clRunTest()"></textarea>
+        <div id="clEditTestResult" style="margin-top:6px;font-family:var(--mono);font-size:0.78rem;max-height:140px;overflow-y:auto"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeClEdit()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClEdit()">Save Rule</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Browser Modal -->
+<div id="modalBrowser" style="display:none">
+  <div class="modal-backdrop" onclick="closeBrowser()">
+    <div class="modal" onclick="event.stopPropagation()" style="width:580px">
+      <div class="modal-header">
+        <div class="modal-title">Select Directory</div>
+        <button class="modal-close" onclick="closeBrowser()">✕</button>
+      </div>
+      <div class="frow">
+        <label class="lbl">Type a path or browse below</label>
+        <div style="display:flex;gap:6px">
+          <input class="inp" id="fb-typed" placeholder="/var/log  or  C:\Logs" style="flex:1"
+                 onkeydown="if(event.key==='Enter')fbNavigate(document.getElementById('fb-typed').value)">
+          <button class="btn btn-secondary" onclick="fbNavigate(document.getElementById('fb-typed').value)">Go</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="fbNavigate(null)">🖥 Root</button>
+          <button class="btn btn-secondary btn-sm" onclick="fbNavigateHome()">🏠 Home</button>
+          <button class="btn btn-secondary btn-sm" onclick="fbNavigate('/var/log')">📋 /var/log</button>
+          <button class="btn btn-secondary btn-sm" onclick="fbNavigate('C:\\\\')">💾 C:\\</button>
+        </div>
+      </div>
+      <div class="fbrowser" id="fb-listing">
+        <div class="empty" style="padding:24px"><div class="empty-icon">📂</div>Loading…</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeBrowser()">Cancel</button>
+        <button class="btn btn-primary" id="fb-select-btn" onclick="fbConfirm()" disabled>Select This Folder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════ NAV
+
+// ═══════════════════════════════════════════════════════════ TOAST
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3800);
+}
+
+// ═══════════════════════════════════════════════════════════ MODALS
+function showModal(id)  { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('[id^="modal"]').forEach(m => m.style.display='none');
+});
+
+// ═══════════════════════════════════════════════════════════ WATCHER
+let watcherOn = false;
+async function checkWatcher() {
+  try {
+    const d = await api('/api/watcher/status');
+    setWatcher(d.running);
+  } catch {}
+}
+function setWatcher(on) {
+  watcherOn = on;
+  document.getElementById('watchBtn').classList.toggle('on', on);
+  document.getElementById('watchLabel').textContent = on ? 'WATCHER ON' : 'WATCHER OFF';
+}
+async function toggleWatcher() {
+  const starting = !watcherOn;
+  const d = await api(starting ? '/api/watcher/start' : '/api/watcher/stop', 'POST');
+  // Confirm state from server response rather than assuming
+  await checkWatcher();
+  toast(watcherOn ? 'Watcher running — monitoring watched directories' : 'Watcher stopped',
+        watcherOn ? 'ok' : 'warn');
+}
+
+// ═══════════════════════════════════════════════════════════ CLASSIFY
+const dz = document.getElementById('dropZ');
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+async function handleFiles(files) { for (const f of files) await classifyFile(f); }
+
+async function classifyFile(file) {
+  const route = document.getElementById('routeToggle').checked;
+  const res   = document.getElementById('clfResults');
+  const card  = mkLoading(`Refracting <strong>${esc(file.name)}</strong>…`);
+  res.prepend(card);
+  const fd = new FormData();
+  fd.append('file', file); fd.append('route', route);
+  try {
+    const d = await fetch('/api/classify', { method:'POST', body:fd }).then(r=>r.json());
+    const el = renderResult(d);
+    card.replaceWith(el);
+    el.scrollIntoView({behavior:'smooth', block:'nearest'});
+    if (d.routed) toast(`→ ${(d.destination||'').split('/').slice(-2).join('/')}`);
+    _postClassifyRefresh();
+  } catch(e) { card.innerHTML = `<span style="color:var(--c-red)">✗ ${esc(e.message)}</span>`; }
+}
+
+async function classifyText() {
+  const text = document.getElementById('pasteArea').value.trim();
+  if (!text) { toast('Paste some log lines first','warn'); return; }
+  const res  = document.getElementById('clfResults');
+  const card = mkLoading('Refracting pasted text…');
+  res.prepend(card);
+  try {
+    const d = await api('/api/classify-text','POST',{text});
+    d.filename = '(pasted text)';
+    const resultEl = renderResult(d);
+    card.replaceWith(resultEl);
+    resultEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+    _postClassifyRefresh();
+  } catch(e) { card.innerHTML = `<span style="color:var(--c-red)">✗ ${esc(e.message)}</span>`; }
+}
+
+function mkLoading(html) {
+  const d = document.createElement('div');
+  d.className = 'result-card';
+  d.innerHTML = `<span class="spin"></span>&nbsp; ${html}`;
+  return d;
+}
+
+function renderResult(d) {
+  const conf  = d.confidence || 0;
+  const col   = conf >= 0.88 ? 'var(--c-teal)' : conf >= 0.76 ? 'var(--c-amber)' : 'var(--c-red)';
+  const reqPats = (d.required_patterns||[]).map(p=>`<span class="pat-chip pat-chip-req" title="Required">${esc(p)}</span>`).join('');
+  const optPats = (d.matched_patterns||[]).filter(p=>!(d.required_patterns||[]).includes(p)).map(p=>`<span class="pat-chip">${esc(p)}</span>`).join('');
+  const pats = reqPats + optPats;
+  const div   = document.createElement('div');
+  div.className = 'result-card';
+  div.innerHTML = `
+    <div class="result-header">
+      <div>
+        <div class="result-st">${esc(d.sourcetype)}</div>
+        <div class="result-meta">${esc(d.filename||'')} &nbsp;·&nbsp; ${esc(d.vendor||'')} / ${esc(d.product||'')}</div>
+      </div>
+      <div class="conf-wrap">
+        <div class="conf-pct" style="color:${col}">${d.confidence_pct}</div>
+        <div class="conf-bar"><div class="conf-fill" style="width:${conf*100}%"></div></div>
+      </div>
+    </div>
+    <div class="tags">
+      <span class="tag cat">📁 ${esc(d.category||'unknown')}</span>
+      ${d.vendor?`<span class="tag">🏢 ${esc(d.vendor)}</span>`:''}
+      ${d.product?`<span class="tag">📦 ${esc(d.product)}</span>`:''}
+    </div>
+    ${pats?`<div class="pat-label">Matched patterns</div><div class="pat-list">${pats}</div>`:''}
+    ${d.destination?`<div style="margin-top:10px;font-family:var(--mono);font-size:1rem;color:var(--text3)">→ ${esc(d.destination)}</div>`:''}
+    ${conf<0.6||d.sourcetype==='unknown'?`<div class="review-banner">⚠ Low confidence — sent to review queue</div>`:''}
+    <div style="margin-top:12px;display:flex;gap:8px">
+      ${d.file_path?`<button class="btn btn-secondary btn-sm" onclick="go('lens');setTimeout(()=>lensAnalyze('${escJ(d.file_path||'')}','${escJ(d.sourcetype||'')}'),100)">◎ Analyze in Lens</button>`:''}
+      ${d.destination?`<button class="btn btn-secondary btn-sm" onclick="openFolder('${escJ(d.destination||'')}')">📂 Open Folder</button>`:''}
+    </div>
+  `;
+  return div;
+}
+
+// ═══════════════════════════════════════════════════════════ BULK SCAN
+let currentJob=null, pollTimer=null;
+
+function startScan() {
+  // Disable button SYNCHRONOUSLY before any async work — prevents all double-clicks
+  const btn = document.getElementById('scanBtn');
+  if (btn.disabled) return;
+  btn.disabled = true;
+
+  const dir = document.getElementById('scanDir').value.trim();
+  if (!dir) { btn.disabled = false; toast('Enter a directory path','warn'); return; }
+  const recursive = document.getElementById('scanRecursive').checked;
+  const route     = document.getElementById('scanRoute').checked;
+
+  document.getElementById('scanProgress').style.display    = 'block';
+  document.getElementById('scanResultsCard').style.display = 'none';
+  setScanProg(0,0,0,true);
+
+  api('/api/scan','POST',{directory:dir,recursive,route})
+    .then(d => {
+      if (d.error && d.job_id) {
+        // 409 — already running, resume polling existing job
+        toast('Resuming existing scan…','warn');
+        currentJob = d.job_id;
+      } else if (d.error) {
+        throw new Error(d.error);
+      } else {
+        currentJob = d.job_id;
+      }
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(pollScan, 800);
+    })
+    .catch(e => {
+      btn.disabled = false;
+      toast('Scan failed: '+e.message,'err');
+    });
+}
+
+async function pollScan() {
+  if (!currentJob) return;
+  const d = await api(`/api/scan/${currentJob}`).catch(()=>null);
+  if (!d) return;
+  setScanProg(d.done, d.total, d.errors, d.running);
+  if (!d.running) {
+    clearInterval(pollTimer);
+    document.getElementById('scanBtn').disabled = false;
+    // Fetch per-file results from audit_log via dedicated endpoint
+    try {
+      const res = await api(`/api/scan/${currentJob}/results`);
+      renderScanResults(res.results||[]);
+    } catch(e) {
+      renderScanResults([]);
+    }
+    toast(`Scan complete — ${d.done} files processed`);
+  }
+}
+
+function setScanProg(done, total, errors, running) {
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('scanProgressLabel').textContent = running&&done<total ? `Scanning… (${done}/${total})` : 'Complete';
+  document.getElementById('scanProgressPct').textContent   = pct+'%';
+  document.getElementById('scanBar').style.width           = pct+'%';
+  document.getElementById('scanDone').textContent   = done;
+  document.getElementById('scanErrors').textContent = errors;
+  document.getElementById('scanTotal').textContent  = total;
+}
+
+function renderScanResults(results) {
+  document.getElementById('scanResultsCard').style.display = 'block';
+  const review = results.filter(r=>r.confidence<0.5||r.sourcetype==='unknown').length;
+  const errors = results.filter(r=>r.sourcetype==='ERROR').length;
+  const types  = new Set(results.map(r=>r.sourcetype).filter(s=>s!=='ERROR'&&s!=='unknown')).size;
+  document.getElementById('sr-classified').textContent = results.length-errors;
+  document.getElementById('sr-review').textContent     = review;
+  document.getElementById('sr-errors').textContent     = errors;
+  document.getElementById('sr-types').textContent      = types;
+
+  document.getElementById('scanResultBody').innerHTML = results.map(r => {
+    const conf = r.confidence||0;
+    const cls  = conf>=0.85?'badge-g':conf>=0.5?'badge-y':'badge-r';
+    const dest = r.destination ? r.destination.split('/').slice(-2).join('/') : '—';
+    return `<tr>
+      <td class="file" title="${esc(r.path)}">${esc(r.file)}</td>
+      <td class="st">${esc(r.sourcetype)}</td>
+      <td><span class="badge ${cls}">${r.confidence_pct||'0%'}</span></td>
+      <td style="color:var(--text3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(dest)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function addScanDirToWatched() {
+  const dir = document.getElementById('scanDir').value.trim();
+  if (!dir) { toast('Enter a directory first','warn'); return; }
+  await api('/api/watched-dirs/add','POST',{path:dir});
+  toast('Added to watched directories');
+}
+
+// ═══════════════════════════════════════════════════════════ DASHBOARD
+async function loadDashboard() {
+  const [stats, sigs] = await Promise.all([api('/api/stats'), api('/api/signatures')]);
+  document.getElementById('d-total').textContent  = stats.total;
+  document.getElementById('d-types').textContent  = Object.keys(stats.by_sourcetype||{}).length;
+  document.getElementById('d-review').textContent = stats.review_queue;
+  document.getElementById('d-sigs').textContent   = sigs.length;
+
+  const cats = stats.by_category||{};
+  const maxC = Math.max(...Object.values(cats),1);
+  const specColors = ['#9b5de5','#5b6cf9','#00c4e8','#00e5b0','#38e06e','#f5c842'];
+  const cEl = document.getElementById('d-cats');
+  cEl.innerHTML = Object.keys(cats).length
+    ? Object.entries(cats).map(([c,n],i)=>`
+        <div class="bar-row">
+          <div class="bar-label">${esc(c)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(n/maxC*100).toFixed(1)}%;background:${specColors[i%specColors.length]}"></div></div>
+          <div class="bar-count">${n}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon">⬡</div>No data yet — classify some files</div>';
+
+  const sts = stats.by_sourcetype||{};
+  const sEl = document.getElementById('d-sts');
+  sEl.innerHTML = Object.keys(sts).length
+    ? `<table><thead><tr><th>Sourcetype</th><th style="text-align:right">Count</th></tr></thead><tbody>
+        ${Object.entries(sts).slice(0,15).map(([s,n])=>`<tr><td class="st">${esc(s)}</td><td style="text-align:right;color:var(--text)">${n}</td></tr>`).join('')}
+       </tbody></table>`
+    : '<div class="empty"><div class="empty-icon">⬡</div>No data yet</div>';
+}
+
+// ═══════════════════════════════════════════════════════════ QUEUE
+// Smart queue loader: never interrupts typing, preserves input values across refresh
+async function smartLoadQueue() {
+  // If user is actively typing in the queue panel, skip this cycle
+  const qList = document.getElementById('queueList');
+  const active = document.activeElement;
+  if (active && qList && qList.contains(active)) return;
+
+  // Snapshot any partial input text so it survives the DOM rebuild
+  const snapInputs = {};
+  document.querySelectorAll('[id^="q-item-"]').forEach(el => {
+    const idx = el.dataset.idx;
+    const inp = el.querySelector('input');
+    if (inp && inp.value) snapInputs[idx] = inp.value;
+  });
+
+  await loadQueue({}, snapInputs);
+}
+
+async function loadQueue(snapDetails={}, snapInputs={}) {
+  const d = await api('/api/queue');
+  const pending = d.pending||[];
+  const badge   = document.getElementById('qbadge');
+  badge.style.display = pending.length ? 'inline' : 'none';
+  badge.textContent   = pending.length;
+
+  const el = document.getElementById('queueList');
+  if (!pending.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">✓</div>Queue is empty — all files classified</div>';
+    return;
+  }
+
+  el.innerHTML = pending.map((item,i) => {
+    const clf      = item.classification||{};
+    const conf     = clf.confidence||0;
+    const iid      = `qi-${i}`;
+    const itemKey  = String(i);
+    const detOpen  = snapDetails[itemKey] ? 'open' : '';
+    const prevText = snapInputs[itemKey]  || '';
+    const fname    = (item.file||'').split(/[\/]/).pop();
+    const hasSample= (item.sample_lines||[]).length > 0;
+    return `<div class="q-item" id="q-item-${i}" data-idx="${i}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;gap:10px">
+        <div class="q-filename" title="${esc(item.file)}">${esc(fname)}</div>
+        <button class="btn btn-secondary btn-sm" onclick="openQueueFile('${escJ(item.file)}')" title="Open file for review" style="flex-shrink:0">
+          📄 View File
+        </button>
+      </div>
+      <div class="q-guess">
+        Best guess: <strong style="color:var(--c-amber)">${esc(clf.sourcetype||'unknown')}</strong>
+        &nbsp;·&nbsp; ${(conf*100).toFixed(0)}% confidence
+        &nbsp;·&nbsp; ${(item.added||'').substring(0,16)}
+      </div>
+      ${hasSample?`
+      <details style="margin-bottom:10px">
+        <summary class="queue-sample-summary">
+          <span class="q-summary-icon">▶</span>
+          Sample lines (${Math.min(item.sample_lines.length,100)} of ${item.sample_lines.length})
+        </summary>
+        <pre class="queue-sample-pre">${esc(item.sample_lines.slice(0,100).join('\n'))}</pre>
+      </details>`:''}
+      <div class="q-resolve" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div style="display:flex;gap:6px">
+          <select class="inp" id="${iid}-sel" style="flex:1" onchange="
+            var v=this.value;
+            if(v) document.getElementById('${iid}').value=v;
+          ">
+            <option value=''>— Pick a sourcetype —</option>
+            ${allSigs.map(s=>`<option value='${escH(s.sourcetype)}'>${escH(s.sourcetype)} (${escH(s.vendor)})</option>`).join('')}
+          </select>
+          <input class="inp" id="${iid}" placeholder="or type sourcetype…" value="${esc(prevText)}" style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="resolveQ(${i},'${escJ(item.file)}','${iid}')">✓ Resolve</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleClearMenu() {
+  const menu = document.getElementById('clearQueueMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  setTimeout(() => {
+    document.addEventListener('click', function closeFn(e) {
+      if (!document.getElementById('clearQueueWrap')?.contains(e.target)) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeFn);
+      }
+    });
+  }, 0);
+}
+
+async function clearQueue(deleteFiles = false) {
+  document.getElementById('clearQueueMenu').style.display = 'none';
+  const pending = document.querySelectorAll('[id^="q-item-"]').length;
+  if (!pending) { toast('Queue is already empty', 'warn'); return; }
+  const action = deleteFiles
+    ? `Remove all ${pending} item(s) from the queue AND permanently delete the files?\n\n⚠ This cannot be undone.`
+    : `Remove all ${pending} item(s) from the review queue?\n\nFiles will not be deleted.`;
+  if (!confirm(action)) return;
+  const d = await api('/api/queue/clear', 'POST', {delete_files: deleteFiles});
+  if (d.success) {
+    const msg = deleteFiles
+      ? `Cleared ${d.cleared} item(s) — ${d.files_deleted} file(s) deleted`
+      : `Cleared ${d.cleared} item(s) from queue`;
+    toast(msg);
+    _postClassifyRefresh();
+    loadQueue();
+  } else {
+    toast('Failed to clear queue', 'err');
+  }
+}
+
+async function deleteQueueItem(file, deleteFile) {
+  const action = deleteFile
+    ? `Delete this file permanently and remove it from the queue?\n\n⚠ This cannot be undone.`
+    : `Remove this item from the queue? The file will not be deleted.`;
+  if (!confirm(action)) return;
+  const d = await api('/api/queue/delete-item', 'POST', {file, delete_file: deleteFile});
+  if (d.success) {
+    toast(deleteFile ? 'Deleted file and removed from queue' : 'Removed from queue');
+    _postClassifyRefresh();
+    loadQueue();
+  } else {
+    toast(d.error || 'Failed', 'err');
+  }
+}
+
+async function resolveQ(i, file, iid) {
+  const st = document.getElementById(iid).value.trim();
+  if (!st) { toast('Enter or select a sourcetype','warn'); return; }
+  const d = await api('/api/queue/resolve','POST',{file, sourcetype:st});
+  if (d.success) {
+    const dest = d.destination ? d.destination.split('/').slice(-2).join('/') : null;
+    toast(dest ? `✓ Routed → ${dest}` : `✓ Resolved as ${st}`);
+    _postClassifyRefresh();
+    loadQueue();
+  } else {
+    toast(d.error||'Failed','err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════ LANDING ZONES
+async function loadLanding() {
+  const zones = await api('/api/landing');
+  const el    = document.getElementById('landingContent');
+  if (!zones.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">⬢</div>No landing zones yet — classify some files</div>';
+    return;
+  }
+  const specColors = ['#00e5b0','#00c4e8','#5b6cf9','#9b5de5','#38e06e','#f5c842'];
+  el.innerHTML = zones.map((z,i) => `
+    <div class="zone-card">
+      <div class="zone-icon" style="color:${specColors[i%specColors.length]}">⬢</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="zone-name">${esc(z.name)}</div>
+          <button class="btn btn-secondary btn-sm" onclick="openFolder('${escJ(z.path)}')" title="Open in file explorer">📂 Open</button>
+        </div>
+        <div class="zone-path">${esc(z.path)}</div>
+        <div class="zone-latest">Last activity: ${esc(z.latest)}</div>
+      </div>
+      <div class="zone-count">
+        <div class="zone-count-num">${z.count}</div>
+        <div class="zone-count-label">files</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function addLandingZone() {
+  const name = document.getElementById('newLandingName').value.trim();
+  if (!name) { toast('Enter a name','warn'); return; }
+  const d = await api('/api/landing/add','POST',{name});
+  if (d.error) { toast(d.error,'err'); return; }
+  toast(`Created: ${d.name}`);
+  closeModal('modalLanding');
+  loadLanding();
+}
+
+// ═══════════════════════════════════════════════════════════ SIGNATURES
+let allSigs = [], editSigSourcetype = null;
+
+async function loadSignatures() {
+  allSigs = await api('/api/signatures');
+  const cats = [...new Set(allSigs.map(s=>s.category))].sort();
+  const sel  = document.getElementById('sigCat');
+  sel.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  document.getElementById('sigTotalBadge').textContent = `${allSigs.length} total`;
+  filterSigs();
+}
+
+function clearSigFilters() {
+  document.getElementById('sigSearch').value = '';
+  document.getElementById('sigCat').value = '';
+  document.getElementById('sigConfMin').value = '0';
+  filterSigs();
+}
+
+// ── Signature sort state ──────────────────────────────────────────────────
+let _sigSortCol = 'sourcetype', _sigSortDir = 'asc';
+
+function sortSigs(col) {
+  if (_sigSortCol === col) {
+    _sigSortDir = _sigSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _sigSortCol = col;
+    _sigSortDir = 'asc';
+  }
+  filterSigs();
+}
+
+function _sigVal(s, col) {
+  switch(col) {
+    case 'sourcetype': return (s.sourcetype||'').toLowerCase();
+    case 'vendor':     return (s.vendor||'').toLowerCase();
+    case 'product':    return (s.product||'').toLowerCase();
+    case 'category':   return (s.category||'').toLowerCase();
+    case 'confidence': return s.confidence||0;
+    case 'patterns':   return s.patterns||0;
+    case 'min':        return s.min_matches||0;
+    default:           return '';
+  }
+}
+
+function filterSigs() {
+  const q       = document.getElementById('sigSearch').value.toLowerCase();
+  const cat     = document.getElementById('sigCat').value;
+  const confMin = parseFloat(document.getElementById('sigConfMin').value)||0;
+  let f = allSigs.filter(s => {
+    const mq = !q || [s.sourcetype,s.vendor,s.product,s.category].some(v=>(v||'').toLowerCase().includes(q));
+    return mq && (!cat || s.category===cat) && s.confidence >= confMin;
+  });
+
+  // Sort
+  f = f.slice().sort((a,b) => {
+    const av = _sigVal(a, _sigSortCol);
+    const bv = _sigVal(b, _sigSortCol);
+    const cmp = typeof av === 'number'
+      ? av - bv
+      : av < bv ? -1 : av > bv ? 1 : 0;
+    return _sigSortDir === 'asc' ? cmp : -cmp;
+  });
+
+  document.getElementById('sigTotalBadge').textContent = `${allSigs.length} total`;
+  const fb = document.getElementById('sigFilteredBadge');
+  fb.textContent = (f.length < allSigs.length) ? `${f.length} shown` : '';
+
+  const el = document.getElementById('sigTable');
+  if (!f.length) { el.innerHTML='<div class="empty" style="padding:20px">No matches</div>'; return; }
+
+  // Build sortable header — show arrow on active column
+  function th(label, col) {
+    const active = _sigSortCol === col;
+    const cls = active ? (_sigSortDir === 'asc' ? 'asc' : 'desc') : '';
+    return `<th class="th-sort ${cls}" onclick="sortSigs('${col}')">${label}</th>`;
+  }
+
+  el.innerHTML = `<table>
+    <thead><tr>
+      ${th('Sourcetype','sourcetype')}
+      ${th('Vendor','vendor')}
+      ${th('Product','product')}
+      ${th('Category','category')}
+      ${th('Confidence','confidence')}
+      ${th('Patterns','patterns')}
+      ${th('Min','min')}
+      <th></th>
+    </tr></thead>
+    <tbody>${f.map(s=>{
+      const cls = s.confidence>=0.9?'badge-g':s.confidence>=0.7?'badge-y':'badge-r';
+      return `<tr>
+        <td class="st">${esc(s.sourcetype)}</td>
+        <td style="color:var(--text)">${esc(s.vendor)}</td>
+        <td style="color:var(--text)">${esc(s.product)}</td>
+        <td><span class="badge badge-b">${esc(s.category)}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:56px;height:5px;background:var(--surf2);border-radius:3px;overflow:hidden;flex-shrink:0">
+              <div style="height:100%;width:${(s.confidence*100).toFixed(0)}%;background:${s.confidence>=0.9?'var(--c-green)':s.confidence>=0.7?'var(--c-cyan)':'#f5c842'}"></div>
+            </div>
+            <span class="badge ${cls}">${(s.confidence*100).toFixed(0)}%</span>
+          </div>
+        </td>
+        <td style="color:var(--text)">
+          ${s.patterns}${s.required_count>0?` <span style="font-size:0.75rem;color:var(--c-cyan)">${s.required_count}R</span>`:''}
+        </td>
+        <td style="color:var(--text)">${s.min_matches}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="openEditPat('${escJ(s.sourcetype)}')">Edit Patterns</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function openEditPat(sourcetype) {
+  editSigSourcetype = sourcetype;
+  const detail = await api(`/api/signatures/${encodeURIComponent(sourcetype)}`);
+  document.getElementById('ep-title').textContent   = `Edit Patterns — ${sourcetype}`;
+  document.getElementById('ep-vendor').textContent  = detail.vendor||'';
+  document.getElementById('ep-product').textContent = detail.product||'';
+  document.getElementById('ep-minmatches').value    = detail.min_matches||1;
+  const cont = document.getElementById('ep-patterns');
+  cont.innerHTML = '';
+  // Load required patterns first (checked), then optional patterns (unchecked)
+  (detail.required_patterns||[]).forEach(p => addPatRow('ep-patterns','Pattern regex…',p, true));
+  (detail.line_patterns||[]).forEach(p => addPatRow('ep-patterns','Pattern regex…',p, false));
+
+  showModal('modalEditPat');
+}
+
+async function savePatterns() {
+  const patterns          = getPats('ep-patterns');
+  const required_patterns = getRequiredPats('ep-patterns');
+  const min_matches       = parseInt(document.getElementById('ep-minmatches').value)||1;
+  const d = await api(`/api/signatures/${encodeURIComponent(editSigSourcetype)}/patterns`,'PUT',
+    {line_patterns: patterns, required_patterns, min_matches});
+  if (d.success) { toast('Patterns saved'); closeModal('modalEditPat'); loadSignatures(); }
+  else toast(d.error||'Failed','err');
+}
+
+// ── Edit Patterns: cleaning config helpers ─────────────────────────────────────
+
+function epToggleHelp(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function epOnModeChange() {
+  const mode = document.getElementById('ep-filter-mode')?.value || '';
+  const lineRow      = document.getElementById('ep-line-filter-row');
+  const multilineRow = document.getElementById('ep-multiline-row');
+
+  if (mode === 'multiline') {
+    if (lineRow)      lineRow.style.display      = 'none';
+    if (multilineRow) multilineRow.style.display = 'block';
+  } else if (mode === 'passthrough') {
+    if (lineRow)      lineRow.style.display      = 'none';
+    if (multilineRow) multilineRow.style.display = 'none';
+  } else {
+    // line or auto — show line filter, hide multiline
+    if (lineRow)      lineRow.style.display      = 'block';
+    if (multilineRow) multilineRow.style.display = 'none';
+  }
+}
+
+function epTestFilter() {
+  const input  = document.getElementById('ep-test-input')?.value || '';
+  const filter = document.getElementById('ep-line-filter')?.value.trim() || '';
+  const result = document.getElementById('ep-test-result');
+  if (!result) return;
+
+  if (!input.trim()) {
+    result.style.display = 'block';
+    result.innerHTML = '<span style="color:var(--c-amber)">Paste some log lines above to test</span>';
+    return;
+  }
+
+  // Banner patterns (mirrors Python cleaner.py)
+  const bannerRe = /^[\s=\-\*#~_]{5,}$|^SHOW\s+\w+|^CISCO:.+VER\.\s*[\d\.]+|^-{3,}\s*$|^\s*$|^#{1,6}\s|^={3,}$/i;
+
+  let compiled = null;
+  if (filter) {
+    try {
+      compiled = new RegExp(filter);
+    } catch(e) {
+      result.style.display = 'block';
+      result.innerHTML = `<span style="color:var(--c-red)">Invalid regex: ${esc(e.message)}</span>`;
+      return;
+    }
+  }
+
+  const lines  = input.split(/\r?\n/);
+  const clean  = [];
+  const noise  = [];
+
+  lines.forEach(line => {
+    const s = line.trimEnd();
+    if (!s) return;
+    if (bannerRe.test(s)) { noise.push(s); return; }
+    if (!compiled) { clean.push(s); return; }
+    if (compiled.test(s)) clean.push(s);
+    else noise.push(s);
+  });
+
+  const total = clean.length + noise.length;
+  let html = `<div class="ep-test-label">${total} lines tested — ${clean.length} clean · ${noise.length} noise</div>`;
+
+  if (clean.length) {
+    html += clean.map(l =>
+      `<div class="ep-test-clean">✓ ${esc(l.length > 100 ? l.slice(0,100)+'…' : l)}</div>`
+    ).join('');
+  }
+  if (noise.length) {
+    html += noise.map(l =>
+      `<div class="ep-test-noise">✗ ${esc(l.length > 100 ? l.slice(0,100)+'…' : l)}</div>`
+    ).join('');
+  }
+
+  result.style.display = 'block';
+  result.innerHTML = html;
+}
+
+async function deleteSig() {
+  if (!confirm(`Delete signature "${editSigSourcetype}"?`)) return;
+  const d = await api(`/api/signatures/${encodeURIComponent(editSigSourcetype)}`,'DELETE');
+  if (d.success) { toast('Signature deleted','warn'); closeModal('modalEditPat'); loadSignatures(); }
+  else toast(d.error||'Failed','err');
+}
+
+function showAddSigModal() {
+  ['ns-sourcetype','ns-vendor','ns-product','ns-header'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ns-confidence').value='0.90';
+  document.getElementById('ns-minmatches').value='1';
+  document.getElementById('ns-filelevel').checked=false;
+  document.getElementById('ns-patterns').innerHTML='';
+  document.getElementById('ns-excludes').innerHTML='';
+  addPatRow('ns-patterns');
+  showModal('modalAddSig');
+}
+
+async function submitNewSig() {
+  const entry = {
+    sourcetype:       document.getElementById('ns-sourcetype').value.trim(),
+    category:         document.getElementById('ns-category').value,
+    vendor:           document.getElementById('ns-vendor').value.trim(),
+    product:          document.getElementById('ns-product').value.trim(),
+    confidence:       parseFloat(document.getElementById('ns-confidence').value)||0.9,
+    min_matches:      parseInt(document.getElementById('ns-minmatches').value)||1,
+    file_level:       document.getElementById('ns-filelevel').checked,
+    line_patterns:    getPats('ns-patterns'),
+    exclude_patterns: getPats('ns-excludes'),
+    header_match:     document.getElementById('ns-header').value.trim()||undefined,
+  };
+  if (!entry.sourcetype||!entry.vendor||!entry.product||!entry.line_patterns.length) {
+    toast('Fill in all required fields (*)','warn'); return;
+  }
+  const d = await api('/api/signatures','POST',entry);
+  if (d.success) { toast(`Signature added: ${entry.sourcetype}`); closeModal('modalAddSig'); loadSignatures(); }
+  else toast(d.error||'Failed','err');
+}
+
+function addPatRow(id, ph='Pattern regex…', val='', required=false) {
+  const c = document.getElementById(id);
+  const r = document.createElement('div');
+  r.className = 'pat-row' + (required ? ' is-required' : '');
+  const cbId = 'req-' + Math.random().toString(36).slice(2);
+  r.innerHTML = `
+    <input type="checkbox" class="pat-req-cb" id="${cbId}" ${required ? 'checked' : ''}
+      onchange="this.closest('.pat-row').classList.toggle('is-required', this.checked)"
+      title="Required — must match for this signature to fire">
+    <label class="pat-req-label" for="${cbId}" title="Required pattern">req</label>
+    <input class="inp" value="${esc(val)}" placeholder="${esc(ph)}">
+    <button class="btn btn-secondary btn-sm" onclick="this.parentElement.remove()">−</button>`;
+  c.appendChild(r);
+}
+function getPats(id) {
+  // Returns only unchecked (optional) pattern inputs
+  return [...document.getElementById(id).querySelectorAll('.pat-row:not(.is-required) input[type=text], .pat-row:not(.is-required) input.inp')]
+    .map(i=>i.value.trim()).filter(Boolean);
+}
+function getRequiredPats(id) {
+  // Returns only checked (required) pattern inputs
+  return [...document.getElementById(id).querySelectorAll('.pat-row.is-required input.inp')]
+    .map(i=>i.value.trim()).filter(Boolean);
+}
+
+// ═══════════════════════════════════════════════════════════ WATCHED DIRS
+async function loadWatchDirs() {
+  const dirs = await api('/api/watched-dirs');
+  const el   = document.getElementById('watchDirList');
+  if (!dirs.length) { el.innerHTML='<div class="empty"><div class="empty-icon">⊙</div>No directories added yet</div>'; return; }
+  el.innerHTML = dirs.map(d=>`
+    <div class="dir-item">
+      <span style="color:var(--c-cyan)">📂</span>
+      <span class="path">${esc(d)}</span>
+      <button class="btn btn-danger btn-sm" onclick="removeWatchDir('${escJ(d)}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+async function addWatchDir() {
+  const path = document.getElementById('newWatchDir').value.trim();
+  if (!path) { toast('Enter a path','warn'); return; }
+  const d = await api('/api/watched-dirs/add','POST',{path});
+  if (d.error) { toast(d.error,'err'); return; }
+  toast('Directory added');
+  document.getElementById('newWatchDir').value='';
+  loadWatchDirs();
+}
+
+async function removeWatchDir(path) {
+  await api('/api/watched-dirs/remove','POST',{path});
+  toast('Removed','warn');
+  loadWatchDirs();
+}
+
+// ═══════════════════════════════════════════════════════════ OPEN FOLDER
+async function openFolder(path) {
+  try {
+    const d = await api(`/api/open-folder?path=${encodeURIComponent(path)}`);
+    if (d.error) toast(d.error, 'err');
+    else if (d.note) {
+      // Headless server — show path in a toast and copy to clipboard if possible
+      toast('Path: ' + (d.path||path), 'warn');
+      if (navigator.clipboard) navigator.clipboard.writeText(d.path||path).catch(()=>{});
+    } else toast('Opened: ' + (d.path||path));
+  } catch(e) { toast('Cannot open folder: '+e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════ FILE VIEWER
+async function openQueueFile(filePath) {
+  // Fetch file contents and display in a modal
+  try {
+    const d = await api(`/api/file/view?path=${encodeURIComponent(filePath)}`);
+    if (d.error) { toast(d.error, 'err'); return; }
+
+    // Build modal content
+    const existing = document.getElementById('modalFileView');
+    if (existing) existing.remove();
+
+    const m = document.createElement('div');
+    m.id = 'modalFileView';
+    m.style.cssText = 'display:flex';
+    m.innerHTML = `
+      <div class="modal-backdrop" onclick="document.getElementById('modalFileView').remove()">
+        <div class="modal" onclick="event.stopPropagation()" style="width:800px;max-height:85vh">
+          <div class="modal-header">
+            <div>
+              <div class="modal-title">📄 ${esc(d.filename)}</div>
+              <div style="font-family:var(--mono);font-size:0.56rem;color:var(--text3);margin-top:3px">${esc(d.path)}</div>
+            </div>
+            <button class="modal-close" onclick="document.getElementById('modalFileView').remove()">✕</button>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;font-family:var(--mono);font-size:0.65rem;color:var(--text2)">
+            <span>Size: ${d.size_human}</span>
+            <span>·</span>
+            <span>Lines shown: ${d.lines_shown} of ${d.total_lines}</span>
+            ${d.truncated?'<span style="color:var(--c-amber)">· Truncated — large file</span>':''}
+          </div>
+          <pre style="background:var(--surf2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-family:var(--mono);font-size:0.72rem;color:var(--text);overflow:auto;max-height:55vh;white-space:pre-wrap;line-height:1.6">${esc(d.content)}</pre>
+          <div class="modal-footer">
+            <div style="font-family:var(--mono);font-size:1rem;color:var(--text3);flex:1">${esc(d.path)}</div>
+            <button class="btn btn-secondary" onclick="document.getElementById('modalFileView').remove()">Close</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+  } catch(e) { toast('Could not open file: ' + e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════ UTILS
+async function api(url, method='GET', body=null) {
+  const opts = {method, headers:{}};
+  if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  return fetch(url,opts).then(r=>r.json());
+}
+function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escH(s) { return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escJ(s) { return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+// ═══════════════════════════════════════════════════════════ FOLDER BROWSER
+let _fbTarget = null;  // which input id to populate
+let _fbCurrent = null; // currently displayed path
+
+function openBrowser(targetInputId) {
+  _fbTarget = targetInputId;
+  const existing = document.getElementById(targetInputId).value.trim();
+  document.getElementById('fb-select-btn').disabled = true;
+  showModal('modalBrowser');
+  fbNavigate(existing || null);
+}
+
+function closeBrowser() {
+  closeModal('modalBrowser');
+}
+
+function fbConfirm() {
+  if (_fbCurrent && _fbTarget) {
+    document.getElementById(_fbTarget).value = _fbCurrent;
+    document.getElementById('fb-typed').value = _fbCurrent;
+  }
+  closeBrowser();
+}
+
+async function fbNavigateHome() {
+  const d = await api('/api/browse').catch(()=>null);
+  if (d && d.path) fbNavigate(d.path);
+  else fbNavigate(null);
+}
+
+async function fbNavigate(path) {
+  const listing = document.getElementById('fb-listing');
+  listing.innerHTML = '<div class="empty" style="padding:16px"><span class="spin"></span> Loading…</div>';
+
+  const url = path ? `/api/browse?path=${encodeURIComponent(path)}` : '/api/browse';
+  try {
+    const d = await api(url);
+    if (d.error) { listing.innerHTML = `<div class="empty" style="padding:16px;color:var(--c-red)">✗ ${esc(d.error)}</div>`; return; }
+
+    // Update typed path field
+    if (d.path) {
+      document.getElementById('fb-typed').value = d.path;
+      _fbCurrent = d.path;
+      document.getElementById('fb-select-btn').disabled = false;
+    }
+
+    let html = '';
+
+    // Windows drive list
+    if (d.drives && d.drives.length) {
+      html += '<div class="fb-drives">';
+      html += d.drives.map(dr => `<div class="fb-drive" onclick="fbNavigate('${escJ(dr)}')">💾 ${esc(dr)}</div>`).join('');
+      html += '</div>';
+    }
+
+    // Header with current path + up button
+    if (d.path) {
+      html += `<div class="fb-header">`;
+      if (d.parent && d.parent !== d.path) {
+        html += `<button class="btn btn-secondary btn-sm" onclick="fbNavigate('${escJ(d.parent)}')">↑ Up</button>`;
+      }
+      html += `<div class="fb-path">📂 ${esc(d.path)}</div></div>`;
+    }
+
+    if (d.dirs && d.dirs.length) {
+      html += d.dirs.map(dir => {
+        const name = dir.split(/[\/]/).filter(Boolean).pop() || dir;
+        return `<div class="fb-item" onclick="fbNavigate('${escJ(dir)}')">
+          <span class="fb-icon">📁</span>
+          <span>${esc(name)}</span>
+        </div>`;
+      }).join('');
+    } else if (d.path) {
+      html += '<div class="empty" style="padding:14px"><div class="empty-icon">📭</div>Empty folder</div>';
+    }
+
+    listing.innerHTML = html;
+  } catch(e) {
+    listing.innerHTML = `<div class="empty" style="padding:16px;color:var(--c-red)">✗ ${esc(e.message)}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════ AUTO-REFRESH
+// Intervals for each page
+const _refreshIntervals = {};
+
+function startAutoRefresh(pageId, fn, ms) {
+  stopAutoRefresh(pageId);
+  fn(); // run immediately
+  _refreshIntervals[pageId] = setInterval(fn, ms);
+}
+
+function stopAutoRefresh(pageId) {
+  if (_refreshIntervals[pageId]) {
+    clearInterval(_refreshIntervals[pageId]);
+    delete _refreshIntervals[pageId];
+  }
+}
+
+// Override go() to wire auto-refresh per page
+const _origGo = go;
+// Patch go to manage refresh timers
+function go(id, el) {
+  // Stop all page-specific timers
+  ['dashboard','queue','landing'].forEach(stopAutoRefresh);
+
+  // Navigate
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+
+  // Start page-specific auto-refresh
+  if (id === 'dashboard')  startAutoRefresh('dashboard', loadDashboard, 10000);
+  if (id === 'queue')      startAutoRefresh('queue',     smartLoadQueue, 5000);
+  if (id === 'landing')    startAutoRefresh('landing',   loadLanding,   12000);
+  if (id === 'signatures') loadSignatures();
+  if (id === 'watchdirs')  loadWatchDirs();
+  if (id === 'lens')       initLens();
+  if (id === 'cleaning')   requestAnimationFrame(() => requestAnimationFrame(loadCleaning));
+}
+
+// After any classify action, immediately refresh queue badge + dashboard stats
+async function _postClassifyRefresh() {
+  // Always refresh queue badge
+  try {
+    const d = await api('/api/queue');
+    const n = (d.pending||[]).length;
+    const b = document.getElementById('qbadge');
+    b.style.display = n > 0 ? 'inline' : 'none';
+    b.textContent = n;
+  } catch {}
+  // Always refresh dashboard stats in background so numbers stay current
+  // regardless of which page is currently visible
+  try { await loadDashboard(); } catch {}
+}
+
+// Patch classifyFile and classifyText to trigger post-classify refresh
+// post-refresh is called inline in classifyFile and classifyText
+
+// Patch startScan to trigger refresh when done
+
+// Patch classifyFile and classifyText to trigger post-classify refresh
+// post-refresh is called inline in classifyFile and classifyText
+
+// ═══════════════════════════════════════════════════════════ INIT
+checkWatcher();
+setInterval(checkWatcher, 10000);
+
+// Initial queue badge check
+api('/api/queue').then(d=>{
+  const n=(d.pending||[]).length, b=document.getElementById('qbadge');
+  if(n>0){b.style.display='inline';b.textContent=n;}
+}).catch(()=>{});
+
+// Start auto-refresh for the default active page (classify — no refresh needed,
+// but we prime the dashboard in background after 2s so first click is instant)
+setTimeout(() => {
+  api('/api/stats').catch(()=>{});
+  // Pre-populate allSigs so the queue resolve dropdown works
+  // even before the user visits the Signatures page
+  api('/api/signatures').then(sigs => {
+    if (sigs && sigs.length) allSigs = sigs;
+  }).catch(()=>{});
+}, 500);
+
+// ═══════════════════════════════════════════════════════════════ LENS
+
+let _lensCurrentSession = null;
+
+async function initLens() {
+  await lensCheckStatus();
+  await lensLoadSessions();
+  await _lensPopulateST();
+}
+
+
+
+async function lensCheckStatus() {
+  const bar = document.getElementById('lensStatusBar');
+  if (!bar) return;
+  try {
+    const r = await api('/api/lens/status');
+    if (r.running && r.model_available) {
+      bar.className = 'lens-status-bar ok';
+      bar.textContent = '◎ Ollama · ' + r.model;
+    } else if (r.running) {
+      bar.className = 'lens-status-bar warn';
+      bar.textContent = '⚠ Model "' + r.model + '" not found — run: ollama pull ' + r.model;
+    } else {
+      bar.className = 'lens-status-bar err';
+      bar.textContent = '✕ Ollama not running — run: ollama serve';
+    }
+    bar.style.display = 'flex';
+  } catch(e) {
+    bar.className = 'lens-status-bar err';
+    bar.textContent = '✕ Cannot reach Lens API';
+    bar.style.display = 'flex';
+  }
+}
+
+async function lensLoadSessions() {
+  const sessions = await api('/api/lens/sessions');
+  const list = document.getElementById('lensSessionList');
+  if (!list) return;
+  if (!sessions || !sessions.length) {
+    list.innerHTML = '<div style="padding:10px 2px;font-size:0.8rem;color:var(--text3)">No sessions yet</div>';
+    return;
+  }
+  list.innerHTML = sessions.map(s => `
+    <div class="lens-session-item ${_lensCurrentSession && _lensCurrentSession.id === s.id ? 'active' : ''}"
+         onclick="lensLoadSession(${s.id})">
+      <div class="lens-session-st">${esc(s.sourcetype || 'unknown')}</div>
+      <div class="lens-session-preview">${esc(s.summary || '')}</div>
+      <div class="lens-session-meta">${s.msg_count || 0} messages · ${_lensRelTime(s.created_at)}</div>
+    </div>
+  `).join('');
+}
+
+async function lensLoadSession(id) {
+  const s = await api('/api/lens/session/' + id);
+  if (!s || s.error) return;
+  _lensCurrentSession = s;
+  _lensShowSession(s);
+  await lensLoadSessions();
+}
+
+function _lensShowSession(s) {
+  const emptyEl = document.getElementById('lensEmpty');
+  const sessEl  = document.getElementById('lensSession');
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (sessEl)  { sessEl.style.display = 'flex'; }
+
+  const fp = document.getElementById('lensFilePath');
+  const st = document.getElementById('lensSourcetype');
+  const ts = document.getElementById('lensSessionTime');
+  const sm = document.getElementById('lensSummary');
+  if (fp) fp.textContent = s.file_path || '';
+  if (st) st.textContent = s.sourcetype || 'unknown';
+  if (ts) ts.textContent = _lensRelTime(s.created_at);
+  if (sm) sm.textContent = s.summary || '(no summary)';
+
+  const chat = document.getElementById('lensChat');
+  if (chat) {
+    chat.innerHTML = (s.messages || []).map(m => _lensRenderMsg(m)).join('');
+    chat.scrollTop = chat.scrollHeight;
+  }
+}
+
+function _lensRenderMsg(m) {
+  const time = m.ts ? new Date(m.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+  return `<div class="lens-msg ${esc(m.role)}">
+    <div class="lens-bubble">${esc(m.content)}</div>
+    <div class="lens-msg-meta">${m.role === 'user' ? 'You' : '◎ Lens'} &nbsp;·&nbsp; ${time}</div>
+  </div>`;
+}
+
+async function lensAnalyzeManual() {
+  const path = document.getElementById('lensManualPath').value.trim();
+  const st   = document.getElementById('lensManualST').value;
+  if (!path) { toast('Enter a file path', 'warn'); return; }
+  await lensAnalyze(path, st);
+}
+
+function lensSetTab(tab) {
+  // Highlight active tab button
+  ['path','file','dir','chat'].forEach(t => {
+    const btn = document.getElementById('lensTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) {
+      btn.style.background = t === tab ? 'var(--c-teal)' : 'var(--surf2)';
+      btn.style.color      = t === tab ? '#000' : 'var(--text2)';
+    }
+  });
+  // Show active panel
+  const panels = {path:'lensInputPath', file:'lensInputFile', dir:'lensInputDir', chat:'lensInputChat'};
+  Object.entries(panels).forEach(([t,id]) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = t === tab ? 'flex' : 'none';
+    if (el) el.style.flexDirection = 'column';
+  });
+  // Sync sourcetype options to upload dropdown
+  // sourcetype combobox uses shared _lensAllSTs — no sync needed
+}
+
+// ── Lens sourcetype combobox ──────────────────────────────────────────────────
+let _lensAllSTs = [];
+
+async function _lensPopulateST() {
+  if (_lensAllSTs.length) return;
+  const sigs = (allSigs && allSigs.length) ? allSigs : await api('/api/signatures');
+  _lensAllSTs = [...new Set(sigs.map(s => s.sourcetype))].sort();
+}
+
+async function lensComboOpen(comboId, inputId) {
+  await lensComboFilter(comboId, inputId);
+  document.getElementById(comboId + 'List').classList.add('open');
+  // Close other combos
+  document.querySelectorAll('.lens-combo-list').forEach(el => {
+    if (el.id !== comboId + 'List') el.classList.remove('open');
+  });
+}
+
+async function lensComboFilter(comboId, inputId) {
+  const input = document.getElementById(inputId);
+  const list  = document.getElementById(comboId + 'List');
+  if (!list) return;
+
+  // Fetch sourcetypes on demand if not yet loaded
+  if (!_lensAllSTs.length) {
+    list.innerHTML = '<div class="lens-combo-empty">Loading…</div>';
+    list.classList.add('open');
+    const sigs = (allSigs && allSigs.length) ? allSigs : await api('/api/signatures');
+    _lensAllSTs = [...new Set(sigs.map(s => s.sourcetype))].sort();
+  }
+
+  const q = (input.value || '').toLowerCase();
+  const matches = q
+    ? _lensAllSTs.filter(st => st.toLowerCase().includes(q))
+    : _lensAllSTs;
+
+  if (!matches.length) {
+    list.innerHTML = '<div class="lens-combo-empty">No matches</div>';
+  } else {
+    list.innerHTML = matches.map(st =>
+      `<div class="lens-combo-item" data-val="${esc(st)}"
+            onmousedown="lensComboSelect('${comboId}','${inputId}','${escJ(st)}')"
+       >${esc(st)}</div>`
+    ).join('');
+  }
+  list.classList.add('open');
+}
+
+function lensComboSelect(comboId, inputId, value) {
+  document.getElementById(inputId).value = value;
+  document.getElementById(comboId + 'List').classList.remove('open');
+}
+
+function lensComboKey(e, comboId, inputId) {
+  const list  = document.getElementById(comboId + 'List');
+  const items = list.querySelectorAll('.lens-combo-item');
+  const active = list.querySelector('.lens-combo-item.active');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = active ? active.nextElementSibling : items[0];
+    if (next) { active && active.classList.remove('active'); next.classList.add('active'); next.scrollIntoView({block:'nearest'}); }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = active ? active.previousElementSibling : items[items.length-1];
+    if (prev) { active && active.classList.remove('active'); prev.classList.add('active'); prev.scrollIntoView({block:'nearest'}); }
+  } else if (e.key === 'Enter') {
+    if (active) { e.preventDefault(); lensComboSelect(comboId, inputId, active.dataset.val); }
+  } else if (e.key === 'Escape') {
+    list.classList.remove('open');
+  }
+}
+
+// Close combos when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.lens-combo')) {
+    document.querySelectorAll('.lens-combo-list').forEach(el => el.classList.remove('open'));
+  }
+});
+
+function _lensSyncSTDropdown() { /* no-op — combobox uses shared _lensAllSTs */ }
+
+async function lensAnalyzeUpload() {
+  const fileInput = document.getElementById('lensFileInput');
+  const st        = document.getElementById('lensFileST').value;
+  if (!fileInput.files.length) { toast('Select a file first', 'warn'); return; }
+
+  const file     = fileInput.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+
+  toast('Uploading and classifying…', 'ok');
+  try {
+    // Upload via existing classify endpoint, get back the file path
+    const resp = await fetch('/api/classify', { method: 'POST', body: formData });
+    const d    = await resp.json();
+    if (d.error) { toast(d.error, 'error'); return; }
+
+    // Use the destination path or construct from landing zone
+    const filePath = d.file_path || d.destination_path || '';
+    const detectedST = st || d.sourcetype || '';
+    if (!filePath) { toast('Could not determine file path after upload', 'error'); return; }
+
+    await lensAnalyze(filePath, detectedST);
+  } catch(e) {
+    toast('Upload failed: ' + e, 'error');
+  }
+}
+
+async function lensAnalyzeDir() {
+  const dirPath = document.getElementById('lensDirPath').value.trim();
+  if (!dirPath) { toast('Enter a directory path', 'warn'); return; }
+
+  toast('Scanning directory…', 'ok');
+  try {
+    // Get file listing from browse/files API
+    const r = await api('/api/browse/files?path=' + encodeURIComponent(dirPath));
+    if (r.error) { toast(r.error, 'error'); return; }
+    const files = r.files || [];
+    if (!files.length) { toast('No files found in directory', 'warn'); return; }
+
+    toast('Found ' + files.length + ' file(s) — analyzing sequentially…', 'ok');
+
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      toast('Analyzing ' + (i+1) + '/' + files.length + ': ' + f.name, 'ok');
+      try {
+        const resp = await api('/api/lens/analyze', 'POST', {
+          file_path:  f.path,
+          sourcetype: f.sourcetype || '',
+        });
+        if (resp.error) {
+          toast('Skipped ' + f.name + ': ' + resp.error, 'warn');
+        }
+      } catch(e) {
+        toast('Skipped ' + f.name + ': ' + e, 'warn');
+      }
+      await lensLoadSessions();
+    }
+    toast('Directory scan complete — ' + files.length + ' sessions created', 'ok');
+    await lensLoadSessions();
+  } catch(e) {
+    toast('Directory scan failed: ' + e, 'error');
+  }
+}
+
+async function lensAnalyze(filePath, sourcetype) {
+  if (!filePath) return;
+  // Show loading
+  const emptyEl = document.getElementById('lensEmpty');
+  const sessEl  = document.getElementById('lensSession');
+  const chat    = document.getElementById('lensChat');
+  const sm      = document.getElementById('lensSummary');
+  const fp      = document.getElementById('lensFilePath');
+  const st      = document.getElementById('lensSourcetype');
+  const ts      = document.getElementById('lensSessionTime');
+
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (sessEl)  sessEl.style.display = 'flex';
+  if (fp) fp.textContent = filePath;
+  if (st) st.textContent = sourcetype || 'analyzing...';
+  if (ts) ts.textContent = 'just now';
+  if (sm) sm.textContent = '';
+  if (chat) chat.innerHTML = `<div class="lens-thinking">
+    <div class="lens-dot"></div><div class="lens-dot"></div><div class="lens-dot"></div>
+    <span>LogWhisperer + Ollama analyzing…</span>
+  </div>`;
+
+  try {
+    const r = await api('/api/lens/analyze', 'POST', { file_path: filePath, sourcetype });
+    if (r.error) { toast(r.error, 'error'); lensNewSession(); return; }
+    const session = await api('/api/lens/session/' + r.session_id);
+    _lensCurrentSession = session;
+    _lensShowSession(session);
+    await lensLoadSessions();
+    toast('Analysis complete', 'ok');
+  } catch(e) {
+    toast('Analysis failed: ' + e, 'error');
+    lensNewSession();
+  }
+}
+
+async function lensSendChat() {
+  if (!_lensCurrentSession) return;
+  const input = document.getElementById('lensChatInput');
+  const btn   = document.getElementById('lensSendBtn');
+  const msg   = input.value.trim();
+  if (!msg || btn.disabled) return;
+
+  btn.disabled = true;
+  input.value  = '';
+  input.style.height = 'auto';
+
+  const chat = document.getElementById('lensChat');
+  chat.insertAdjacentHTML('beforeend', _lensRenderMsg({role:'user', content:msg, ts:new Date().toISOString()}));
+  chat.insertAdjacentHTML('beforeend',
+    `<div id="lensThinking" class="lens-thinking">
+       <div class="lens-dot"></div><div class="lens-dot"></div><div class="lens-dot"></div>
+       <span>Thinking…</span>
+     </div>`);
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    // Free chat (no session id) — create a minimal session on first message
+    if (_lensCurrentSession && !_lensCurrentSession.id) {
+      const init = await api('/api/lens/analyze', 'POST', {
+        file_path: '', sourcetype: '', free_chat: true, prompt: msg
+      });
+      if (init.session_id) {
+        _lensCurrentSession.id = init.session_id;
+        const fp = document.getElementById('lensFilePath');
+        if (fp) fp.textContent = '(free chat)';
+      }
+    }
+    const r = await api('/api/lens/chat', 'POST', {
+      session_id: _lensCurrentSession.id,
+      message:    msg,
+    });
+    document.getElementById('lensThinking')?.remove();
+    chat.insertAdjacentHTML('beforeend',
+      _lensRenderMsg({
+        role:    'assistant',
+        content: r.error ? 'Error: ' + r.error : r.response,
+        ts:      new Date().toISOString(),
+      })
+    );
+    _lensCurrentSession = await api('/api/lens/session/' + _lensCurrentSession.id);
+    await lensLoadSessions();
+  } catch(e) {
+    document.getElementById('lensThinking')?.remove();
+    chat.insertAdjacentHTML('beforeend',
+      _lensRenderMsg({role:'assistant', content:'Request failed: ' + e, ts:new Date().toISOString()})
+    );
+  } finally {
+    btn.disabled = false;
+    chat.scrollTop = chat.scrollHeight;
+    input.focus();
+  }
+}
+
+async function lensStartFreeChat() {
+  // Open a chat session with Mistral without a log file
+  const emptyEl = document.getElementById('lensEmpty');
+  const sessEl  = document.getElementById('lensSession');
+  const chat    = document.getElementById('lensChat');
+  const fp      = document.getElementById('lensFilePath');
+  const st      = document.getElementById('lensSourcetype');
+  const ts      = document.getElementById('lensSessionTime');
+  const sm      = document.getElementById('lensSummary');
+
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (sessEl)  sessEl.style.display  = 'flex';
+  if (fp) fp.textContent = '(no file — free chat)';
+  if (st) st.textContent = 'mistral';
+  if (ts) ts.textContent = 'just now';
+  if (sm) sm.textContent = 'Direct chat with Mistral — ask anything';
+  if (chat) chat.innerHTML = `<div class="lens-thinking" style="justify-content:center;padding:20px;font-family:var(--mono);font-size:0.85rem;color:var(--text3)">
+    ◎ Mistral is ready — ask a question below
+  </div>`;
+
+  // Create a lightweight session object so lensSendChat works
+  _lensCurrentSession = { id: null, file_path: '', sourcetype: 'mistral', messages: [] };
+
+  const input = document.getElementById('lensChatInput');
+  if (input) { input.placeholder = 'Ask Mistral anything…'; input.focus(); }
+}
+
+function lensNewChat() {
+  // Clear only the chat messages — keep the current session and file context
+  // so the user can ask fresh questions about the same file
+  if (!_lensCurrentSession) {
+    // No session open — same as new analysis
+    lensNewSession();
+    return;
+  }
+  const chat = document.getElementById('lensChat');
+  if (chat) chat.innerHTML = '';
+  const input = document.getElementById('lensChatInput');
+  if (input) { input.value = ''; input.style.height = 'auto'; input.focus(); }
+  toast('Chat cleared — session context preserved', 'ok');
+}
+
+function lensNewSession() {
+  _lensCurrentSession = null;
+  const emptyEl = document.getElementById('lensEmpty');
+  const sessEl  = document.getElementById('lensSession');
+  if (emptyEl) emptyEl.style.display = 'flex';
+  if (sessEl)  sessEl.style.display = 'none';
+  const p = document.getElementById('lensManualPath');
+  if (p) p.value = '';
+  lensLoadSessions();
+}
+
+async function lensDeleteSession() {
+  if (!_lensCurrentSession) return;
+  await api('/api/lens/session/' + _lensCurrentSession.id, 'DELETE');
+  lensNewSession();
+  toast('Session deleted');
+}
+
+function _lensRelTime(iso) {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)    return 'just now';
+  if (diff < 3600)  return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+
+// ═══════════════════════════════════════════════════════════ CLEANING RULES
+
+let _clSigs      = [];      // all sigs with derived cleaning config
+let _clFiltered  = [];      // currently displayed
+let _clSortCol   = 'sourcetype';
+let _clSortDir   = 'asc';
+let _clEditST    = null;    // sourcetype being edited
+
+async function loadCleaning() {
+  const data = await api('/api/cleaning/derived');
+  if (!data || data.error) {
+    document.getElementById('clTable').innerHTML =
+      '<tr><td colspan="6" style="padding:20px;color:var(--c-red)">Failed to load cleaning rules: ' +
+      esc((data && data.error) || 'unknown error') + '</td></tr>';
+    return;
+  }
+  if (!Array.isArray(data) || data.length === 0) {
+    document.getElementById('clTable').innerHTML =
+      '<tr><td colspan="6" style="padding:20px;color:var(--c-amber)">API returned empty data. Check server logs.</td></tr>';
+    return;
+  }
+
+  _clSigs = data.map(s => ({
+    sourcetype:       s.sourcetype      || '',
+    category:         s.category        || '',
+    filter_mode:      s.filter_mode     || '',
+    line_filter:      s.line_filter     || '',
+    multiline_mode:   s.multiline_mode  || '',
+    eff_mode:         s.eff_mode        || 'auto',
+    eff_filter:       s.eff_filter      || '',
+    eff_multiline:    s.eff_multiline   || '',
+    is_custom:        !!s.is_custom,
+    cleaning_enabled: s.cleaning_enabled !== false,
+  }));
+
+  _clUpdateStats();
+  filterCleaning();
+}
+
+function _clUpdateStats() {
+  const counts = {line:0, multiline:0, passthrough:0, auto:0};
+  _clSigs.forEach(s => {
+    const m = s.eff_mode || 'auto';
+    if (counts[m] !== undefined) counts[m]++;
+    else counts.auto++;
+  });
+  const custom = _clSigs.filter(s => s.is_custom).length;
+
+  document.getElementById('clStats').innerHTML = `
+    <div class="cl-stat">
+      <div class="cl-stat-num">${_clSigs.length}</div>
+      <div class="cl-stat-lbl">Total Signatures</div>
+    </div>
+    <div class="cl-stat">
+      <div class="cl-stat-num" style="color:var(--c-teal)">${counts.auto}</div>
+      <div class="cl-stat-lbl">Auto-Derived</div>
+    </div>
+    <div class="cl-stat">
+      <div class="cl-stat-num" style="color:var(--c-green)">${counts.line}</div>
+      <div class="cl-stat-lbl">Line Mode</div>
+    </div>
+    <div class="cl-stat">
+      <div class="cl-stat-num" style="color:var(--c-indigo)">${counts.multiline}</div>
+      <div class="cl-stat-lbl">Multiline Mode</div>
+    </div>
+    <div class="cl-stat">
+      <div class="cl-stat-num" style="color:var(--text3)">${counts.passthrough}</div>
+      <div class="cl-stat-lbl">Passthrough</div>
+    </div>
+    <div class="cl-stat">
+      <div class="cl-stat-num" style="color:var(--c-amber)">${custom}</div>
+      <div class="cl-stat-lbl">Custom Rules</div>
+    </div>`;
+}
+
+function filterCleaning() {
+  const q    = (document.getElementById('clSearch')?.value || '').toLowerCase();
+  const mode = document.getElementById('clModeFilter')?.value || '';
+
+  _clFiltered = _clSigs.filter(s => {
+    const mq = !q || s.sourcetype.toLowerCase().includes(q) ||
+                     s.category.toLowerCase().includes(q);
+    const mm = !mode || s.eff_mode === mode ||
+               (mode === 'auto' && !s.is_custom);
+    return mq && mm;
+  });
+
+  sortCleaning(_clSortCol, true);
+}
+
+function sortCleaning(col, keepDir=false) {
+  if (!keepDir) {
+    if (_clSortCol === col) _clSortDir = _clSortDir === 'asc' ? 'desc' : 'asc';
+    else { _clSortCol = col; _clSortDir = 'asc'; }
+  }
+  _clFiltered.sort((a,b) => {
+    const av = col === 'mode' ? a.eff_mode : (a[col]||'').toLowerCase();
+    const bv = col === 'mode' ? b.eff_mode : (b[col]||'').toLowerCase();
+    return _clSortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  _clRender();
+}
+
+function _clModeBadge(mode, isCustom) {
+  const cls = {
+    line:        'cl-mode-line',
+    multiline:   'cl-mode-multiline',
+    passthrough: 'cl-mode-passthrough',
+    auto:        'cl-mode-auto',
+  }[mode] || 'cl-mode-auto';
+  return `<span class="cl-mode-badge ${cls}">${esc(mode)}</span>`;
+}
+
+function _clRender() {
+  const tbody = document.getElementById('clTable');
+  if (!_clFiltered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">No signatures match</td></tr>';
+    return;
+  }
+
+  const countEl = document.getElementById('clCount');
+  if (countEl) countEl.textContent = `${_clFiltered.length} of ${_clSigs.length} signatures`;
+  tbody.innerHTML = _clFiltered.map(s => {
+    const filterText = s.eff_mode === 'multiline'
+      ? (s.eff_multiline ? `<span style="color:var(--c-indigo)">${esc(s.eff_multiline)}</span>` : '<span style="color:var(--text3)">auto</span>')
+      : (s.eff_filter   ? `<span class="cl-filter-text" title="${esc(s.eff_filter)}">${esc(s.eff_filter)}</span>`
+                        : '<span style="color:var(--text3)">auto-derived</span>');
+    const source = s.is_custom
+      ? '<span style="color:var(--c-amber);font-family:var(--mono);font-size:0.75rem">custom</span>'
+      : '<span style="color:var(--text3);font-family:var(--mono);font-size:0.75rem">auto</span>';
+    const enabled = s.cleaning_enabled !== false;
+    return `<tr style="cursor:pointer${!enabled ? ';opacity:0.5' : ''}" onclick="openClEdit('${escJ(s.sourcetype)}')">
+      <td class="st">${esc(s.sourcetype)}</td>
+      <td><span class="badge badge-b">${esc(s.category)}</span></td>
+      <td>${enabled ? _clModeBadge(s.eff_mode, s.is_custom) : '<span style="color:var(--text3);font-family:var(--mono);font-size:0.85rem">disabled</span>'}</td>
+      <td>${enabled ? filterText : '<span style="color:var(--text3)">—</span>'}</td>
+      <td>${source}</td>
+      <td style="text-align:center" onclick="event.stopPropagation()">
+        <div class="cl-toggle" onclick="toggleCleaningEnabled('${escJ(s.sourcetype)}', ${!enabled})">
+          <div class="cl-toggle-track ${enabled ? 'on' : ''}">
+            <div class="cl-toggle-thumb"></div>
+          </div>
+        </div>
+      </td>
+      <td style="text-align:right" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openClEdit('${escJ(s.sourcetype)}')">Edit</button>
+        ${s.is_custom ? `<button class="btn btn-secondary btn-sm" style="margin-left:4px;color:var(--c-amber)"
+          onclick="resetClRule('${escJ(s.sourcetype)}')">Reset</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openClEdit(sourcetype) {
+  const s = _clSigs.find(x => x.sourcetype === sourcetype);
+  if (!s) return;
+  _clEditST = sourcetype;
+
+  // Populate modal fields
+  document.getElementById('clEditTitle').textContent =
+    s.is_custom ? `Edit Cleaning Rule — ${sourcetype}` : `Add Cleaning Rule — ${sourcetype}`;
+  document.getElementById('clEditSubtitle').textContent =
+    `${s.vendor||''} · ${s.product||''} · ${s.category||''}`;
+  document.getElementById('clEditMode').value          = s.filter_mode || '';
+  document.getElementById('clEditFilter').value        = s.line_filter || '';
+  document.getElementById('clEditMultilineMode').value = s.multiline_mode || '';
+  document.getElementById('clEditTestInput').value     = '';
+  document.getElementById('clEditTestResult').innerHTML = '';
+  clEditOnModeChange();
+  showModal('modalCleaningEdit');
+}
+
+function closeClEdit() {
+  _clEditST = null;
+  closeModal('modalCleaningEdit');
+}
+
+function clEditOnModeChange() {
+  const mode = document.getElementById('clEditMode')?.value || '';
+
+  // Show/hide sections
+  const filterSec = document.getElementById('clEditFilterSection');
+  const mmSec     = document.getElementById('clEditMMSection');
+  if (filterSec) filterSec.style.display = (mode === '' || mode === 'line') ? 'block' : 'none';
+  if (mmSec)     mmSec.style.display     = mode === 'multiline' ? 'block' : 'none';
+
+  // Update hint box
+  const hints = {
+    '':           'PRISM derives the cleaning mode automatically from required_patterns at classification time. No manual config needed — recommended for most signatures.',
+    'line':       'Each line is one event. Lines matching the Line Filter regex are kept. Everything else — banners, headers, separators — goes to a .noise.log sidecar file in the same landing zone folder.',
+    'multiline':  'Events span multiple lines. PRISM extracts complete event blocks and strips everything outside them. Choose the Multiline Mode that matches your log format.',
+    'passthrough':'File is routed as-is with no cleaning applied. Use this when no reliable filter pattern exists for the sourcetype.',
+  };
+  const hintBox = document.getElementById('clModeHintBox');
+  if (hintBox) hintBox.textContent = hints[mode] || '';
+
+  // Update effective filter hint
+  if (_clEditST) {
+    const s = _clSigs.find(x => x.sourcetype === _clEditST);
+    if (s) {
+      const fh = document.getElementById('clEffFilterHint');
+      if (fh) fh.textContent = s.eff_filter
+        ? 'Auto-derived: ' + s.eff_filter
+        : 'No auto-derived filter for this signature.';
+      const mh = document.getElementById('clEffMMHint');
+      if (mh) mh.textContent = s.eff_multiline
+        ? 'Auto-derived: ' + s.eff_multiline
+        : 'No auto-derived multiline mode.';
+    }
+  }
+}
+
+function clRunTest() {
+  const input  = document.getElementById('clEditTestInput').value;
+  const filter = document.getElementById('clEditFilter').value.trim();
+  const result = document.getElementById('clEditTestResult');
+
+  if (!input.trim()) { result.innerHTML = ''; return; }
+
+  const bannerRe = /^[\s=\-\*#~_]{5,}$|^SHOW\s+\w+|^CISCO:.+VER\.\s*[\d.]+|^-{3,}\s*$|^\s*$|^#{1,6}\s|^={3,}$/i;
+  let compiled = null;
+  if (filter) {
+    try { compiled = new RegExp(filter); }
+    catch(e) { result.innerHTML = `<span style="color:var(--c-red)">Invalid regex: ${esc(e.message)}</span>`; return; }
+  }
+
+  const lines = input.split(/\r?\n/);
+  let clean = 0, noise = 0, html = '';
+
+  lines.forEach(line => {
+    const s = line.trimEnd();
+    if (!s) return;
+    if (bannerRe.test(s)) {
+      noise++;
+      html += `<div class="cl-test-noise">✗ ${esc(s.length>80?s.slice(0,80)+'…':s)}</div>`;
+      return;
+    }
+    if (!compiled || compiled.test(s)) {
+      clean++;
+      html += `<div class="cl-test-clean">✓ ${esc(s.length>80?s.slice(0,80)+'…':s)}</div>`;
+    } else {
+      noise++;
+      html += `<div class="cl-test-noise">✗ ${esc(s.length>80?s.slice(0,80)+'…':s)}</div>`;
+    }
+  });
+
+  result.innerHTML = `<div class="cl-test-label">${clean} clean · ${noise} noise</div>` + html;
+}
+
+async function toggleCleaningEnabled(sourcetype, enabled) {
+  const d = await api(
+    `/api/cleaning/${encodeURIComponent(sourcetype)}/toggle`,
+    'POST', {enabled}
+  );
+  if (d.success) {
+    // Update local state immediately
+    const s = _clSigs.find(x => x.sourcetype === sourcetype);
+    if (s) s.cleaning_enabled = enabled;
+    _clRender();
+    toast(enabled ? `Cleaning enabled: ${sourcetype}` : `Cleaning disabled: ${sourcetype}`,
+          enabled ? 'ok' : 'warn');
+  } else {
+    toast(d.error || 'Toggle failed', 'err');
+  }
+}
+
+async function saveClEdit() {
+  if (!_clEditST) return;
+  const mode    = document.getElementById('clEditMode')?.value || '';
+  const filter  = document.getElementById('clEditFilter')?.value.trim() || '';
+  const mmMode  = document.getElementById('clEditMultilineMode')?.value || '';
+
+  // We need to preserve existing line_patterns and required_patterns
+  const existing = await api(`/api/signatures/${encodeURIComponent(_clEditST)}`);
+  if (existing.error) { toast('Could not load signature', 'err'); return; }
+
+  const d = await api(`/api/signatures/${encodeURIComponent(_clEditST)}/patterns`, 'PUT', {
+    line_patterns:    existing.line_patterns    || [],
+    required_patterns:existing.required_patterns|| [],
+    min_matches:      existing.min_matches      || 1,
+    filter_mode:      mode,
+    line_filter:      filter,
+    multiline_mode:   mmMode,
+  });
+
+  if (d.success) {
+    toast(`Cleaning rule saved for ${_clEditST}`);
+    closeClEdit();
+    await loadCleaning();
+  } else {
+    toast(d.error || 'Save failed', 'err');
+  }
+}
+
+async function resetClRule(sourcetype) {
+  if (!confirm(`Reset cleaning rule for "${sourcetype}" to auto-derived?`)) return;
+  const existing = await api(`/api/signatures/${encodeURIComponent(sourcetype)}`);
+  if (existing.error) { toast('Could not load signature', 'err'); return; }
+
+  const d = await api(`/api/signatures/${encodeURIComponent(sourcetype)}/patterns`, 'PUT', {
+    line_patterns:    existing.line_patterns    || [],
+    required_patterns:existing.required_patterns|| [],
+    min_matches:      existing.min_matches      || 1,
+    filter_mode:      '',
+    line_filter:      '',
+    multiline_mode:   '',
+  });
+
+  if (d.success) {
+    toast(`Reset to auto for ${sourcetype}`, 'warn');
+    await loadCleaning();
+  } else {
+    toast(d.error || 'Reset failed', 'err');
+  }
+}
+
+function toggleClExplainer() {
+  const el  = document.getElementById('clExplainer');
+  const btn = document.getElementById('clExplainerBtn');
+  const show = el.style.display === 'none';
+  el.style.display  = show ? 'block' : 'none';
+  btn.textContent   = show ? 'Hide' : 'Show';
+}
+
+</script>
+</body>
+</html>

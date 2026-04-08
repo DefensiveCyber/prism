@@ -1,0 +1,4835 @@
+settings:
+  confidence_threshold: 0.6
+  file_read_bytes: 65536
+  max_sample_lines: 100
+  move_files: true
+signatures:
+- sourcetype: WinEventLog:Security
+  category: windows
+  vendor: Microsoft
+  product: Windows Security Event Log
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Security</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  - <TimeCreated SystemTime=
+  - Microsoft-Windows-Security-Auditing
+  min_matches: 0
+- sourcetype: WinEventLog:System
+  category: windows
+  vendor: Microsoft
+  product: Windows System Event Log
+  confidence: 0.97
+  required_patterns:
+  - <Channel>System</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  - <TimeCreated SystemTime=
+  min_matches: 0
+- sourcetype: WinEventLog:Application
+  category: windows
+  vendor: Microsoft
+  product: Windows Application Event Log
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Application</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  - <TimeCreated SystemTime=
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-Sysmon/Operational
+  category: windows
+  vendor: Microsoft
+  product: Sysmon Operational
+  confidence: 0.98
+  required_patterns:
+  - <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <Provider Name="Microsoft-Windows-Sysmon"
+  - <EventID[\s>]
+  - <TimeCreated SystemTime=
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-PowerShell/Operational
+  category: windows
+  vendor: Microsoft
+  product: PowerShell Operational
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Microsoft-Windows-PowerShell/Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  - ScriptBlockText
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-TaskScheduler/Operational
+  category: windows
+  vendor: Microsoft
+  product: Task Scheduler Operational
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Microsoft-Windows-TaskScheduler/Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-TerminalServices-LocalSessionManager/Operational
+  category: windows
+  vendor: Microsoft
+  product: Terminal Services Event Log
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Microsoft-Windows-TerminalServices.*Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-WMI-Activity/Operational
+  category: windows
+  vendor: Microsoft
+  product: WMI Activity Operational
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Microsoft-Windows-WMI-Activity/Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  min_matches: 0
+- sourcetype: WinEventLog:Microsoft-Windows-Windows Defender/Operational
+  category: security
+  vendor: Microsoft
+  product: Windows Defender Operational
+  confidence: 0.97
+  required_patterns:
+  - <Channel>Microsoft-Windows-Windows Defender/Operational</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - Threat Name
+  - Severity Name
+  min_matches: 0
+- sourcetype: WinEventLog:ForwardedEvents
+  category: windows
+  vendor: Microsoft
+  product: Windows Forwarded Events
+  confidence: 0.97
+  required_patterns:
+  - <Channel>ForwardedEvents</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  min_matches: 0
+- sourcetype: WinEventLog:Setup
+  category: windows
+  vendor: Microsoft
+  product: Windows Setup Event Log
+  confidence: 0.95
+  required_patterns:
+  - <Channel>Setup</Channel>
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  min_matches: 0
+- sourcetype: WinEventLog:evtx
+  category: windows
+  vendor: Microsoft
+  product: Windows Event Log (EVTX binary)
+  confidence: 0.88
+  required_patterns:
+  - <Event xmlns=.*win/2004/08/events
+  line_patterns:
+  - <EventID[\s>]
+  - <Provider Name=
+  - <TimeCreated SystemTime=
+  min_matches: 0
+- sourcetype: XmlWinEventLog:Security
+  category: windows
+  vendor: Microsoft
+  product: Windows Security (XML/Syslog)
+  confidence: 0.95
+  required_patterns:
+  - EventCode=\d+
+  - ComputerName=\w+
+  line_patterns:
+  - 'Security ID:'
+  - 'Account Name:'
+  - 'Logon Type:'
+  - 'Source Network Address:'
+  min_matches: 0
+- sourcetype: XmlWinEventLog:System
+  category: windows
+  vendor: Microsoft
+  product: Windows System (XML/Syslog)
+  confidence: 0.95
+  required_patterns:
+  - EventCode=\d+
+  - ComputerName=\w+
+  line_patterns:
+  - 'Service Name:'
+  - 'Service Type:'
+  - 'Start Type:'
+  min_matches: 0
+- sourcetype: cisco:asa
+  category: cisco
+  vendor: Cisco
+  product: ASA/FTD Firewall
+  confidence: 0.97
+  required_patterns:
+  - '%ASA-([a-z]+-)*\d+-\d+|%FTD-([a-z]+-)*\d+-\d+'
+  line_patterns:
+  - Built (inbound|outbound)
+  - Teardown (TCP|UDP|ICMP)
+  - Deny (tcp|udp|icmp)
+  - access-list.*denied
+  - '(outside|inside|dmz):'
+  - User .* executed
+  - User .* logged
+  - locked out on exceeding
+  - priv level changed
+  - New user added
+  - User deleted from
+  min_matches: 0
+- sourcetype: cisco:ios
+  category: cisco
+  vendor: Cisco
+  product: IOS/IOS-XE Router/Switch
+  confidence: 0.95
+  required_patterns:
+  - '%[A-Z][A-Z0-9_\-]+-\d+-[A-Z0-9_]+:'
+  line_patterns:
+  - '%SYS-'
+  - '%LINK-'
+  - '%LINEPROTO-'
+  - '%OSPF-'
+  - '%BGP-'
+  - interface (GigabitEthernet|TenGigabitEthernet|FastEthernet)
+  - line protocol is (up|down)
+  min_matches: 0
+- sourcetype: cisco:ios:show_log
+  category: cisco
+  vendor: Cisco
+  product: IOS Show Logging Output
+  confidence: 0.9
+  required_patterns:
+  - 'Syslog logging: (enabled|disabled)'
+  - Log Buffer \(
+  line_patterns:
+  - 'Console logging:'
+  - 'Buffer logging:'
+  - '%[A-Z]+-\d+-[A-Z_]+'
+  min_matches: 0
+- sourcetype: cisco:nx_os
+  category: cisco
+  vendor: Cisco
+  product: NX-OS
+  confidence: 0.95
+  required_patterns:
+  - '%ETHPORT-|%VPC-|%NX_OS-|%NXOS-|%STP-'
+  line_patterns:
+  - '%FEX-'
+  - '%VSHD-'
+  - slot/tmgr
+  - vpc peer-link
+  min_matches: 0
+- sourcetype: cisco:wlc
+  category: cisco
+  vendor: Cisco
+  product: Wireless LAN Controller
+  confidence: 0.93
+  required_patterns:
+  - LWAPP|CAPWAP|apfMsConnTask|apfReceiveTask
+  line_patterns:
+  - DOT11
+  - 802\.11
+  - Associated.*AP
+  - Disassociated.*AP
+  min_matches: 0
+- sourcetype: cisco:ise
+  category: cisco
+  vendor: Cisco
+  product: Identity Services Engine
+  confidence: 0.95
+  required_patterns:
+  - CISE_[A-Za-z_]+\s+\d+
+  line_patterns:
+  - Authentication (succeeded|failed)
+  - NetworkDeviceName=
+  - cisco-av-pair
+  - EAP-TLS|PEAP
+  - RadiusIdentityStore=
+  min_matches: 0
+- sourcetype: cisco:firepower
+  category: cisco
+  vendor: Cisco
+  product: Firepower/FMC
+  confidence: 0.93
+  required_patterns:
+  - IngressZone=|EgressZone=|AccessControlRuleName=
+  line_patterns:
+  - IntrusionPolicy=
+  - InlineResult=
+  - SID=\d+
+  - GID=\d+
+  min_matches: 0
+- sourcetype: cisco:meraki
+  category: cisco
+  vendor: Cisco
+  product: Meraki
+  confidence: 0.93
+  required_patterns:
+  - flows src=|urls src=|events type=|security_event
+  line_patterns:
+  - airmarshal_events
+  - type=vpn_connectivity_change
+  - src=\d+\.\d+\.\d+\.\d+
+  min_matches: 0
+- sourcetype: cisco:umbrella
+  category: cisco
+  vendor: Cisco
+  product: Umbrella DNS Security
+  confidence: 0.93
+  required_patterns:
+  - '"verdict":|"blockedCategories":'
+  line_patterns:
+  - '"identities":'
+  - '"categories":'
+  - '"internalIp":'
+  - '"externalIp":'
+  min_matches: 0
+- sourcetype: pan:traffic
+  category: network
+  vendor: Palo Alto Networks
+  product: NGFW Traffic
+  confidence: 0.97
+  required_patterns:
+  - ',TRAFFIC,'
+  - ',\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2},'
+  line_patterns:
+  - ',(allow|deny),'
+  - from-policy
+  - ',(tcp|udp|icmp),'
+  - \d+\.\d+\.\d+\.\d+,\d+\.\d+\.\d+\.\d+
+  min_matches: 0
+- sourcetype: pan:threat
+  category: network
+  vendor: Palo Alto Networks
+  product: NGFW Threat
+  confidence: 0.97
+  required_patterns:
+  - ',THREAT,'
+  - ',\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2},'
+  line_patterns:
+  - ',(vulnerability|spyware|virus|wildfire),'
+  - threat-id=\d+
+  - ',(high|critical|medium|low),'
+  min_matches: 0
+- sourcetype: pan:system
+  category: network
+  vendor: Palo Alto Networks
+  product: NGFW System
+  confidence: 0.95
+  required_patterns:
+  - ',SYSTEM,'
+  - ',\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2},'
+  line_patterns:
+  - ',general,0,'
+  - ',critical,'
+  - ',high,'
+  min_matches: 0
+- sourcetype: pan:config
+  category: network
+  vendor: Palo Alto Networks
+  product: NGFW Config
+  confidence: 0.95
+  required_patterns:
+  - ',CONFIG,'
+  - ',\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2},'
+  line_patterns:
+  - Committed
+  - admin=
+  - client=
+  min_matches: 0
+- sourcetype: fgt_traffic
+  category: network
+  vendor: Fortinet
+  product: FortiGate Traffic
+  confidence: 0.97
+  required_patterns:
+  - type=traffic
+  - devname=\S+
+  line_patterns:
+  - logid=\d{10}
+  - srcip=\d+
+  - dstip=\d+
+  - action=(accept|deny|drop)
+  - FortiGate
+  min_matches: 0
+- sourcetype: fgt_event
+  category: network
+  vendor: Fortinet
+  product: FortiGate Event
+  confidence: 0.95
+  required_patterns:
+  - type=event
+  - devname=\S+
+  line_patterns:
+  - logid=\d{10}
+  - subtype=(system|vpn|user|router)
+  min_matches: 0
+- sourcetype: fgt_utm
+  category: network
+  vendor: Fortinet
+  product: FortiGate UTM
+  confidence: 0.95
+  required_patterns:
+  - type=utm
+  - devname=\S+
+  line_patterns:
+  - subtype=(ips|webfilter|antivirus|emailfilter)
+  - logid=\d{10}
+  - severity=
+  min_matches: 0
+- sourcetype: checkpoint:firewall
+  category: network
+  vendor: Check Point
+  product: Firewall-1
+  confidence: 0.95
+  required_patterns:
+  - product=Firewall|product=VPN-1
+  line_patterns:
+  - action=(accept|drop|reject|encrypt)
+  - src=\d+
+  - dst=\d+
+  - rule=\d+
+  - origin=
+  min_matches: 0
+- sourcetype: checkpoint:firewall:ecs
+  category: network
+  vendor: Check Point
+  product: Firewall (ECS)
+  confidence: 0.95
+  required_patterns:
+  - '"observer\.vendor"\s*:\s*"Checkpoint"'
+  - checkpoint\.logid
+  line_patterns:
+  - '"event\.action":'
+  - '"source\.ip":'
+  - '"destination\.ip":'
+  min_matches: 0
+- sourcetype: checkpoint:firewall:legacy
+  category: network
+  vendor: Check Point
+  product: Firewall (Legacy Syslog)
+  confidence: 0.9
+  required_patterns:
+  - FireWall-1|FW-1
+  - (accept|drop|reject)
+  line_patterns:
+  - src=\d+\.\d+\.\d+\.\d+
+  - dst=\d+\.\d+\.\d+\.\d+
+  - proto=\d+
+  min_matches: 0
+- sourcetype: juniper:junos
+  category: network
+  vendor: Juniper
+  product: JunOS
+  confidence: 0.93
+  required_patterns:
+  - RT_FLOW|UI_COMMIT|rpd\[|mgd\[|chassisd
+  line_patterns:
+  - fpc\d
+  - '%KERN-\d'
+  - junos
+  - Juniper Networks
+  - session created|session closed
+  min_matches: 0
+- sourcetype: juniper:netscreen
+  category: network
+  vendor: Juniper
+  product: NetScreen
+  confidence: 0.93
+  required_patterns:
+  - NetScreen|device_id=
+  line_patterns:
+  - policy_id=\d+
+  - action=(Permit|Deny|Reject|Tunnel)
+  - src=\d+
+  - dst=\d+
+  min_matches: 0
+- sourcetype: f5:bigip:ltm
+  category: network
+  vendor: F5
+  product: BIG-IP LTM
+  confidence: 0.95
+  required_patterns:
+  - tmm\d+\[\d+\]:|tmm\[|BIG-IP
+  line_patterns:
+  - Connection (error|reset)
+  - pool.*member
+  - virtual.*server
+  - (TCP|SSL) error
+  min_matches: 0
+- sourcetype: f5:bigip:asm
+  category: network
+  vendor: F5
+  product: BIG-IP ASM
+  confidence: 0.95
+  required_patterns:
+  - unit_hostname=.*f5|attack_type=
+  line_patterns:
+  - violations=
+  - request_status=
+  - ip_client=
+  - severity=\d+
+  min_matches: 0
+- sourcetype: sonicwall:firewall
+  category: network
+  vendor: SonicWall
+  product: SonicWall Firewall
+  confidence: 0.95
+  required_patterns:
+  - id=firewall sn=\S+|sonicwall
+  line_patterns:
+  - fw=\d+\.\d+\.\d+\.\d+
+  - src=\d+
+  - dst=\d+
+  - proto=(TCP|UDP|ICMP)
+  - c=\d+ m=\d+
+  min_matches: 0
+- sourcetype: zscaler:zia:web
+  category: network
+  vendor: Zscaler
+  product: ZIA Web Proxy
+  confidence: 0.95
+  required_patterns:
+  - '"sourcetype"\s*:\s*"zscalernss-web"|ZscalerNSS.*web|action=Allowed\|Blocked.*url='
+  line_patterns:
+  - user=
+  - url=https?://
+  - cat=
+  - reason=
+  min_matches: 0
+- sourcetype: zscaler:zia:firewall
+  category: network
+  vendor: Zscaler
+  product: ZIA Firewall
+  confidence: 0.95
+  required_patterns:
+  - ZscalerNSS.*fw|"sourcetype"\s*:\s*"zscalernss-fw"
+  line_patterns:
+  - src=\d+
+  - dst=\d+
+  - proto=(TCP|UDP)
+  - action=
+  min_matches: 0
+- sourcetype: bluecoat:proxySG
+  category: network
+  vendor: Broadcom/Symantec
+  product: ProxySG
+  confidence: 0.93
+  required_patterns:
+  - PROXYSVC|proxy_services|BlueCoat|SGOS
+  line_patterns:
+  - c-ip=\d+
+  - cs-uri-stem=
+  - sc-status=\d+
+  - cs(User-Agent)=
+  min_matches: 0
+- sourcetype: infoblox:dns
+  category: network
+  vendor: Infoblox
+  product: DNS
+  confidence: 0.95
+  required_patterns:
+  - named\[\d+\]:|dhcpd\[|infoblox
+  line_patterns:
+  - client \d+\.\d+\.\d+\.\d+#\d+
+  - 'query:'
+  - NOERROR|NXDOMAIN
+  - IN (A|AAAA|MX|NS|PTR)
+  min_matches: 0
+- sourcetype: infoblox:dhcp
+  category: network
+  vendor: Infoblox
+  product: DHCP
+  confidence: 0.95
+  required_patterns:
+  - 'dhcpd\[\d+\]:'
+  line_patterns:
+  - DHCPACK|DHCPOFFER|DHCPREQUEST|DHCPDISCOVER
+  - \d+\.\d+\.\d+\.\d+ via
+  - lease \d+\.\d+\.\d+\.\d+
+  min_matches: 0
+- sourcetype: zeek:conn
+  category: network
+  vendor: Zeek
+  product: Zeek Connection Log
+  confidence: 0.97
+  required_patterns:
+  - '#path\s+conn|#separator.*\t.*#path'
+  line_patterns:
+  - orig_bytes
+  - resp_bytes
+  - conn_state
+  - proto
+  min_matches: 0
+- sourcetype: zeek:dns
+  category: network
+  vendor: Zeek
+  product: Zeek DNS Log
+  confidence: 0.97
+  required_patterns:
+  - '#path\s+dns'
+  line_patterns:
+  - query\t
+  - qtype_name
+  - rcode_name
+  - answers
+  min_matches: 0
+- sourcetype: zeek:http
+  category: network
+  vendor: Zeek
+  product: Zeek HTTP Log
+  confidence: 0.97
+  required_patterns:
+  - '#path\s+http'
+  line_patterns:
+  - method\t
+  - host\t
+  - uri\t
+  - status_code
+  - user_agent
+  min_matches: 0
+- sourcetype: sophos:utm
+  category: network
+  vendor: Sophos
+  product: Sophos UTM
+  confidence: 0.93
+  required_patterns:
+  - id="[0-9]+" severity="\w+" sys="\w+"
+  line_patterns:
+  - sub="\w+"
+  - name="\w+"
+  - srcip="\d+
+  - dstip="\d+
+  min_matches: 0
+- sourcetype: sophos:central
+  category: endpoint
+  vendor: Sophos
+  product: Sophos Central
+  confidence: 0.93
+  required_patterns:
+  - Sophos Central|"source":"Sophos"
+  line_patterns:
+  - threat=
+  - 'type=Event::'
+  - location=
+  - name=
+  min_matches: 0
+- sourcetype: barracuda:waf
+  category: network
+  vendor: Barracuda
+  product: Web Application Firewall
+  confidence: 0.93
+  required_patterns:
+  - unit_type=WF|BWAF|barracuda.*waf
+  line_patterns:
+  - log_type=WF
+  - src_ip=\d+
+  - action=(ALLOW|DENY|LOG)
+  min_matches: 0
+- sourcetype: barracuda:spamfirewall
+  category: email
+  vendor: Barracuda
+  product: Spam Firewall
+  confidence: 0.93
+  required_patterns:
+  - unit_type=ESG|BESS|barracuda.*spam
+  line_patterns:
+  - log_type=
+  - from=\S+@\S+
+  - action=(ACCEPT|DENY|QUARANTINE)
+  min_matches: 0
+- sourcetype: netscaler:ssl
+  category: network
+  vendor: Citrix
+  product: NetScaler SSL
+  confidence: 0.93
+  required_patterns:
+  - SSLVPN TCPCONNREQ|NetScaler|ns_ssl
+  line_patterns:
+  - Sessionid=\d+
+  - Source \d+\.\d+\.\d+\.\d+
+  - (SSLVPN|AAA) (LOGIN|LOGOUT|TCPCONNREQ)
+  min_matches: 0
+- sourcetype: netflow:log
+  category: network
+  vendor: Generic
+  product: NetFlow
+  confidence: 0.9
+  required_patterns:
+  - srcaddr=|src_addr=|IPV4_SRC_ADDR=
+  line_patterns:
+  - dstaddr=|dst_addr=
+  - protocol=\d+
+  - in_bytes=\d+
+  - out_bytes=\d+
+  min_matches: 0
+- sourcetype: linux_secure
+  category: linux
+  vendor: Linux
+  product: /var/log/secure (auth)
+  confidence: 0.97
+  required_patterns:
+  - sshd\[\d+\]:|pam_unix\(|sudo:\s+\w+
+  line_patterns:
+  - Failed password for
+  - Accepted (password|publickey)
+  - Invalid user
+  - authentication failure
+  - session opened
+  min_matches: 0
+- sourcetype: linux_syslog
+  category: linux
+  vendor: Linux
+  product: Syslog
+  confidence: 0.9
+  required_patterns:
+  - (kernel:|systemd\[\d+\]:|rsyslogd\[)
+  line_patterns:
+  - systemd-journald
+  - NetworkManager
+  - CRON\[\d+\]
+  - dbus-daemon
+  - audit\[\d+\]
+  min_matches: 0
+- sourcetype: linux_audit
+  category: linux
+  vendor: Linux
+  product: Linux Audit Log
+  confidence: 0.97
+  required_patterns:
+  - type=(SYSCALL|USER_AUTH|USER_LOGIN|EXECVE|PROCTITLE)
+  line_patterns:
+  - audit\(\d+\.\d+:\d+\)
+  - auid=\d+
+  - uid=\d+
+  - pid=\d+
+  - comm="
+  min_matches: 0
+- sourcetype: linux_cron
+  category: linux
+  vendor: Linux
+  product: Cron Log
+  confidence: 0.95
+  required_patterns:
+  - 'CRON\[\d+\]:|crond\[\d+\]:'
+  line_patterns:
+  - \(root\) CMD
+  - \(www-data\) CMD
+  - pam_unix\(crond
+  min_matches: 0
+- sourcetype: syslog
+  category: linux
+  vendor: Linux
+  product: Generic Syslog (RFC 5424/3164)
+  confidence: 0.85
+  required_patterns:
+  - ^<\d+>[A-Z][a-z]{2}\s+\d+\s+\d+:\d+:\d+\s+\S+\s+\S+
+  line_patterns:
+  - '\[\d+\]:'
+  - warning|error|notice|info|debug
+  - \d+\.\d+\.\d+\.\d+
+  min_matches: 0
+- sourcetype: iptables:log
+  category: linux
+  vendor: Linux
+  product: iptables Firewall
+  confidence: 0.97
+  required_patterns:
+  - IN=\S* OUT=\S* MAC=
+  line_patterns:
+  - SRC=\d+\.\d+\.\d+\.\d+
+  - DST=\d+\.\d+\.\d+\.\d+
+  - PROTO=(TCP|UDP|ICMP)
+  - DPT=\d+
+  min_matches: 0
+- sourcetype: auditd:log
+  category: linux
+  vendor: Linux
+  product: auditd
+  confidence: 0.97
+  required_patterns:
+  - node=\S+ type=(SYSCALL|USER_AUTH|LOGIN|EXECVE)
+  line_patterns:
+  - msg=audit\(\d+\.\d+:\d+\)
+  - uid=\d+
+  - pid=\d+
+  min_matches: 0
+- sourcetype: access_combined
+  category: web
+  vendor: Apache/Nginx
+  product: Web Access Log (Combined)
+  confidence: 0.95
+  required_patterns:
+  - \d+\.\d+\.\d+\.\d+ - .* \[(.*)\] "(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH)
+  line_patterns:
+  - '" \d{3} \d+'
+  - '"Mozilla/'
+  - Apache|nginx
+  min_matches: 0
+- sourcetype: apache:error
+  category: web
+  vendor: Apache
+  product: Apache Error Log
+  confidence: 0.95
+  required_patterns:
+  - \[(?:error|warn|notice|info|debug)\] \[pid \d+\]|\[(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)
+  line_patterns:
+  - 'AH\d+:'
+  - mod_\w+
+  - client \d+\.\d+\.\d+\.\d+
+  min_matches: 0
+- sourcetype: iis
+  category: web
+  vendor: Microsoft
+  product: IIS Access Log
+  confidence: 0.95
+  required_patterns:
+  - '#Software: Microsoft Internet Information Services'
+  - '#Fields: date time'
+  line_patterns:
+  - W3SVC\d+
+  - GET|POST|HEAD
+  - HTTP/1\.[01]
+  min_matches: 0
+- sourcetype: nginx:plus:kv
+  category: web
+  vendor: Nginx
+  product: Nginx Plus (Key-Value)
+  confidence: 0.93
+  required_patterns:
+  - upstream_response_time=|upstream_addr=\d+\.\d+\.\d+\.\d+
+  line_patterns:
+  - request_time=
+  - status=\d+
+  - bytes_sent=\d+
+  min_matches: 0
+- sourcetype: haproxy:log
+  category: web
+  vendor: HAProxy
+  product: HAProxy
+  confidence: 0.95
+  required_patterns:
+  - 'haproxy\[\d+\]:'
+  line_patterns:
+  - \d+\.\d+\.\d+\.\d+:\d+ \[\d+
+  - (CONNECT|GET|POST)
+  - '[0-9]+/[0-9]+/[0-9]+/[0-9]+/[0-9]+ \d+ \d+'
+  min_matches: 0
+- sourcetype: squid:access
+  category: web
+  vendor: Squid
+  product: Squid Proxy
+  confidence: 0.95
+  required_patterns:
+  - ^\d+\.\d+\s+\d+\s+\d+\.\d+\.\d+\.\d+\s+(TCP_|UDP_)
+  line_patterns:
+  - DIRECT/
+  - CONNECT|GET|POST
+  - /\d{3}$
+  min_matches: 0
+- sourcetype: tomcat:access
+  category: web
+  vendor: Apache
+  product: Tomcat Access Log
+  confidence: 0.93
+  required_patterns:
+  - org\.apache\.catalina|Tomcat
+  line_patterns:
+  - INFO|WARN|ERROR|SEVERE
+  - localhost_access_log
+  - (GET|POST|PUT) /
+  min_matches: 0
+- sourcetype: traefik:access
+  category: web
+  vendor: Traefik
+  product: Traefik Proxy
+  confidence: 0.93
+  required_patterns:
+  - '"RouterName":|"entryPointName":|traefik'
+  line_patterns:
+  - '"RequestMethod":'
+  - '"DownstreamStatus":\d+'
+  - '"Duration":\d+'
+  min_matches: 0
+- sourcetype: envoyproxy:access
+  category: web
+  vendor: Envoy
+  product: Envoy Proxy
+  confidence: 0.93
+  required_patterns:
+  - \[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\] "(GET|POST|PUT|DELETE)
+  - envoy
+  line_patterns:
+  - '"-" \d+ \d+ \d+'
+  - upstream_host=
+  - x-envoy-
+  min_matches: 0
+- sourcetype: aws:cloudtrail
+  category: cloud
+  vendor: Amazon
+  product: CloudTrail
+  confidence: 0.97
+  required_patterns:
+  - '"eventSource"\s*:\s*"[^"]+\.amazonaws\.com"'
+  - '"eventName"\s*:\s*"'
+  line_patterns:
+  - '"userIdentity":'
+  - '"awsRegion":'
+  - '"errorCode":'
+  - '"requestParameters":'
+  min_matches: 0
+- sourcetype: aws:cloudwatch
+  category: cloud
+  vendor: Amazon
+  product: CloudWatch
+  confidence: 0.95
+  required_patterns:
+  - '"logGroup"\s*:\s*"|logGroup=\S+'
+  line_patterns:
+  - '"logStream":'
+  - '"timestamp":\d+'
+  - aws_account_id
+  min_matches: 0
+- sourcetype: aws:vpc:flow
+  category: cloud
+  vendor: Amazon
+  product: VPC Flow Logs
+  confidence: 0.97
+  required_patterns:
+  - ^\d+ \d{12} eni-[a-f0-9]+
+  line_patterns:
+  - (ACCEPT|REJECT)
+  - \d+\.\d+\.\d+\.\d+ \d+\.\d+\.\d+\.\d+
+  - (tcp|udp|icmp) \d+
+  min_matches: 0
+- sourcetype: aws:s3:access
+  category: cloud
+  vendor: Amazon
+  product: S3 Server Access Log
+  confidence: 0.95
+  required_patterns:
+  - '[a-f0-9]{64} \S+\.\S+ \[\d+/\w+/\d+:\d+:\d+:\d+ [+-]\d+\]'
+  line_patterns:
+  - REST\.(GET|PUT|DELETE)
+  - S3Console
+  - AKIA[A-Z0-9]{16}
+  min_matches: 0
+- sourcetype: aws:cloudwatch:ec2
+  category: cloud
+  vendor: Amazon
+  product: CloudWatch EC2
+  confidence: 0.93
+  required_patterns:
+  - i-[a-f0-9]{8,17}\s|EC2.*CloudWatch
+  line_patterns:
+  - CPUUtilization
+  - NetworkIn
+  - StatusCheckFailed
+  min_matches: 0
+- sourcetype: awsfargate:log
+  category: cloud
+  vendor: Amazon
+  product: ECS Fargate
+  confidence: 0.93
+  required_patterns:
+  - arn:aws:ecs:[a-z0-9-]+:\d+:task/
+  line_patterns:
+  - container_name=
+  - container_id=
+  - log_group=
+  min_matches: 0
+- sourcetype: azure:audit
+  category: cloud
+  vendor: Microsoft
+  product: Azure Audit
+  confidence: 0.97
+  required_patterns:
+  - '"operationName"\s*:\s*"'
+  - '"tenantId"\s*:\s*"'
+  line_patterns:
+  - '"callerIpAddress":'
+  - '"resultType":'
+  - '"category":'
+  - '"resourceType":'
+  min_matches: 0
+  multiline_mode: json_lines
+  filter_mode: multiline
+- sourcetype: azure:aad:signin
+  category: cloud
+  vendor: Microsoft
+  product: Azure Active Directory Sign-In Logs
+  confidence: 0.97
+  required_patterns:
+  - '"category"\s*:\s*"SignInLogs"'
+  - '"operationName"\s*:\s*"Sign-in activity"'
+  line_patterns:
+  - '"callerIpAddress":'
+  - '"userPrincipalName":'
+  - '"conditionalAccessStatus":'
+  - '"clientAppUsed":'
+  - '"riskState":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: gcp:audit
+  category: cloud
+  vendor: Google
+  product: GCP Audit Log
+  confidence: 0.95
+  required_patterns:
+  - '"logName"\s*:\s*"projects/[^"]+/logs/cloudaudit'
+  - '"@type"\s*:\s*"type\.googleapis\.com/google\.cloud\.audit\.AuditLog"'
+  line_patterns:
+  - '"methodName":'
+  - '"serviceName":'
+  - '"resourceName":'
+  min_matches: 0
+- sourcetype: gcp:vpcflow
+  category: cloud
+  vendor: Google
+  product: GCP VPC Flow
+  confidence: 0.95
+  required_patterns:
+  - '"logName"\s*:\s*"projects/[^"]+/logs/compute\.googleapis\.com'
+  line_patterns:
+  - '"connection":'
+  - '"src_ip":'
+  - '"dest_ip":'
+  - '"reporter":'
+  min_matches: 0
+- sourcetype: gsuite:activity
+  category: cloud
+  vendor: Google
+  product: Google Workspace Activity
+  confidence: 0.93
+  required_patterns:
+  - '"kind"\s*:\s*"admin#reports#activity"'
+  line_patterns:
+  - '"applicationName":'
+  - '"events":'
+  - '"actor":'
+  min_matches: 0
+- sourcetype: google:workspace:admin
+  category: cloud
+  vendor: Google
+  product: Google Workspace Admin
+  confidence: 0.93
+  required_patterns:
+  - '"applicationName"\s*:\s*"(admin|login|token|groups)"'
+  - '"kind"\s*:\s*"admin#reports'
+  line_patterns:
+  - '"etag":'
+  - '"events":'
+  - '"ipAddress":'
+  min_matches: 0
+- sourcetype: zoom:webhook
+  category: cloud
+  vendor: Zoom
+  product: Zoom Webhook
+  confidence: 0.9
+  required_patterns:
+  - '"event"\s*:\s*"(meeting\.|webinar\.|user\.|recording\.)'
+  - '"payload"\s*:\s*\{'
+  line_patterns:
+  - '"account_id":'
+  - '"object":'
+  - '"host_id":'
+  min_matches: 0
+- sourcetype: mssql:error
+  category: database
+  vendor: Microsoft
+  product: SQL Server Error Log
+  confidence: 0.95
+  required_patterns:
+  - 'SQL Server.*\d{4}-\d{2}-\d{2}|spid\d+\s+Error:'
+  line_patterns:
+  - Login failed for user
+  - 'Severity:'
+  - 'State:'
+  - Cannot open database
+  min_matches: 0
+- sourcetype: oracle:db:audit
+  category: database
+  vendor: Oracle
+  product: Oracle DB Audit
+  confidence: 0.95
+  required_patterns:
+  - AUDIT_TRAIL\s*=|ACTION :\[|SESSIONID\s*:\[\d+\]
+  line_patterns:
+  - 'LOGON\s*:'
+  - 'DB User\s*:'
+  - RETURNCODE\s*:\[\d+\]
+  min_matches: 0
+- sourcetype: oracle:audit
+  category: database
+  vendor: Oracle
+  product: Oracle Unified Audit
+  confidence: 0.95
+  required_patterns:
+  - '"AUDIT_TYPE":|AUDIT_TYPE=UNIFIED'
+  line_patterns:
+  - '"DB_USER":'
+  - '"ACTION_NAME":'
+  - '"RETURN_CODE":'
+  min_matches: 0
+- sourcetype: mysql:error
+  category: database
+  vendor: MySQL
+  product: MySQL Error Log
+  confidence: 0.95
+  required_patterns:
+  - mysqld\[\d+\]:|InnoDB:|MySQL.*\d{4}-\d{2}-\d{2}T
+  line_patterns:
+  - \[ERROR\]|\[Warning\]
+  - Access denied for user
+  - Table.*doesn\'t exist
+  min_matches: 0
+- sourcetype: postgresql:log
+  category: database
+  vendor: PostgreSQL
+  product: PostgreSQL Log
+  confidence: 0.95
+  required_patterns:
+  - postgres\[\d+\]:|LOG:\s+(duration|statement|connection)
+  - postgresql
+  line_patterns:
+  - 'FATAL:'
+  - 'ERROR:'
+  - 'HINT:'
+  - 'DETAIL:'
+  - database=\w+
+  min_matches: 0
+- sourcetype: mongodb:diag
+  category: database
+  vendor: MongoDB
+  product: MongoDB Diagnostic Log
+  confidence: 0.95
+  required_patterns:
+  - 'mongod\[\d+\]:|"s"\s*:\s*"(I|W|E|D|F)"\s*,\s*"c"\s*:'
+  line_patterns:
+  - '"ctx":'
+  - '"msg":'
+  - '"NETWORK"'
+  - '"REPL"'
+  - '"STORAGE"'
+  min_matches: 0
+- sourcetype: elasticsearch:audit
+  category: database
+  vendor: Elastic
+  product: Elasticsearch Audit
+  confidence: 0.93
+  required_patterns:
+  - '"type"\s*:\s*"audit"'
+  - '"cluster\.name":|"node\.name":'
+  line_patterns:
+  - '"origin\.type":'
+  - '"action":'
+  - '"indices":'
+  min_matches: 0
+- sourcetype: redis:log
+  category: database
+  vendor: Redis
+  product: Redis Log
+  confidence: 0.95
+  required_patterns:
+  - \d+:\w \d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2}\.\d+ ([\*\#\-])
+  line_patterns:
+  - oO0OoO0OoO0Oo
+  - Server initialized
+  - MASTER <-> REPLICA
+  - AOF rewrite
+  min_matches: 0
+- sourcetype: ms:o365:management
+  category: email
+  vendor: Microsoft
+  product: Office 365 Management API
+  confidence: 0.95
+  required_patterns:
+  - '"Workload"\s*:\s*"(Exchange|SharePoint|AzureActiveDirectory|Teams)"'
+  - '"RecordType"\s*:\s*\d+'
+  line_patterns:
+  - '"Operation":'
+  - '"UserId":'
+  - '"ClientIP":'
+  min_matches: 0
+- sourcetype: ms:exchange
+  category: email
+  vendor: Microsoft
+  product: Exchange Server
+  confidence: 0.95
+  required_patterns:
+  - 'MSExchange\w+|SMTP.*MAIL FROM:|SMTP.*RCPT TO:'
+  line_patterns:
+  - 250 2\.6\.0
+  - 354 Start input
+  - 'Connector:'
+  - (Accepted|Rejected) to transport
+  min_matches: 0
+- sourcetype: proofpoint:tap
+  category: email
+  vendor: Proofpoint
+  product: Targeted Attack Protection
+  confidence: 0.93
+  required_patterns:
+  - '"messagesDelivered":|"messagesBlocked":|"clicksPermitted":'
+  line_patterns:
+  - '"threatStatus":'
+  - '"classification":'
+  - '"sender":'
+  min_matches: 0
+- sourcetype: mimecast:siem
+  category: email
+  vendor: Mimecast
+  product: SIEM Logs
+  confidence: 0.93
+  required_patterns:
+  - '"acc"\s*:\s*"[A-Z0-9]+"'
+  - '"Sender"\s*:.*mimecast'
+  line_patterns:
+  - '"Act":'
+  - '"Dir":'
+  - '"RcptTo":'
+  - '"SpamInfo":'
+  min_matches: 0
+- sourcetype: crowdstrike:falcon:event
+  category: endpoint
+  vendor: CrowdStrike
+  product: Falcon Platform
+  confidence: 0.97
+  required_patterns:
+  - '"CustomerIDString"\s*:\s*"[A-Z0-9]+"'
+  - '"EventType"\s*:\s*"(DetectionSummaryEvent|UserActivityAuditEvent|ProcessRollupCall)"'
+  line_patterns:
+  - '"ComputerName":'
+  - '"UserName":'
+  - '"CommandLine":'
+  min_matches: 0
+- sourcetype: microsoft:defender_atp
+  category: endpoint
+  vendor: Microsoft
+  product: Defender for Endpoint
+  confidence: 0.95
+  required_patterns:
+  - '"category"\s*:\s*"(DefenderExpert|AntivirusDetection|AlertEvidence)"'
+  - '"MachineId"\s*:\s*"[a-f0-9]+"'
+  line_patterns:
+  - '"AlertId":'
+  - '"Severity":'
+  - '"ThreatName":'
+  min_matches: 0
+- sourcetype: sentinelone
+  category: endpoint
+  vendor: SentinelOne
+  product: SentinelOne EDR
+  confidence: 0.95
+  required_patterns:
+  - '"agentId"\s*:\s*"[a-f0-9]+"'
+  - '"dataSource\.vendor"\s*:\s*"SentinelOne"'
+  line_patterns:
+  - '"threatInfo":'
+  - '"agentDetectionInfo":'
+  - '"mitigationStatus":'
+  min_matches: 0
+- sourcetype: carbonblack:edr
+  category: endpoint
+  vendor: VMware
+  product: Carbon Black EDR
+  confidence: 0.95
+  required_patterns:
+  - '"cb\.event_type"|"sensor_id"\s*:\s*\d+.*"cb\b'
+  line_patterns:
+  - '"process_guid":'
+  - '"parent_guid":'
+  - '"cmdline":'
+  min_matches: 0
+- sourcetype: symantec:ep
+  category: endpoint
+  vendor: Broadcom
+  product: Symantec Endpoint Protection
+  confidence: 0.93
+  required_patterns:
+  - 'Site:\s+\S+,Server Name:\s+\S+,\w+ Name:'
+  line_patterns:
+  - 'Risk name:'
+  - 'Actual action:'
+  - 'Event Description:'
+  min_matches: 0
+- sourcetype: trellix:epo
+  category: endpoint
+  vendor: Trellix
+  product: ePO (McAfee)
+  confidence: 0.93
+  required_patterns:
+  - McAfee.*ePolicy|EPOEvents|ThreatEventID=
+  line_patterns:
+  - ThreatName=
+  - ThreatType=
+  - TargetUserName=
+  min_matches: 0
+- sourcetype: cylance:protect
+  category: endpoint
+  vendor: Cylance
+  product: CylancePROTECT
+  confidence: 0.93
+  required_patterns:
+  - '"EventType"\s*:\s*"(Threat|Device|Policy|AuditLog)"'
+  - '"DeviceName"\s*:\s*".*cylance'
+  line_patterns:
+  - '"ThreatClass":'
+  - '"FileStatus":'
+  - '"GlobalQuarantined":'
+  min_matches: 0
+- sourcetype: osquery:result
+  category: endpoint
+  vendor: osquery
+  product: osquery Result Log
+  confidence: 0.97
+  required_patterns:
+  - '"name"\s*:\s*"[^"]+"\s*,\s*"hostIdentifier"'
+  - '"action"\s*:\s*"(added|removed)"'
+  line_patterns:
+  - '"columns":'
+  - '"unixTime":'
+  - '"epoch":'
+  min_matches: 0
+- sourcetype: osquery:syslog
+  category: endpoint
+  vendor: osquery
+  product: osquery Syslog
+  confidence: 0.95
+  required_patterns:
+  - 'osqueryd\[\d+\]:'
+  line_patterns:
+  - Executing scheduled query
+  - distributed_query
+  - I\d{4} \d{2}:\d{2}:\d{2}
+  min_matches: 0
+- sourcetype: santa:log
+  category: endpoint
+  vendor: Google
+  product: Santa (macOS)
+  confidence: 0.97
+  required_patterns:
+  - action=(EXEC|BLOCK|ALLOW|RENAME|LINK)
+  - decision=(ALLOW|BLOCK)
+  line_patterns:
+  - path=/
+  - sha256=[a-f0-9]{64}
+  - pid=\d+
+  min_matches: 0
+- sourcetype: okta:system
+  category: security
+  vendor: Okta
+  product: Okta System Log
+  confidence: 0.97
+  required_patterns:
+  - '"eventType"\s*:\s*"(user\.|policy\.|application\.|system\.)'
+  - '"actor"\s*:\s*\{'
+  line_patterns:
+  - '"outcome":'
+  - '"target":'
+  - '"client":'
+  min_matches: 0
+- sourcetype: cyberark:epv
+  category: security
+  vendor: CyberArk
+  product: Enterprise Password Vault
+  confidence: 0.95
+  required_patterns:
+  - CyberArk.*Vault|CPM|PVWA|PSM
+  line_patterns:
+  - Reason=
+  - Safe=
+  - Target Account=
+  min_matches: 0
+- sourcetype: cyberarkpas:audit
+  category: security
+  vendor: CyberArk
+  product: CyberArk PAS Audit
+  confidence: 0.95
+  required_patterns:
+  - '"ProductName"\s*:\s*"CyberArk"'
+  - '"Audit"\s*:'
+  line_patterns:
+  - '"Action":'
+  - '"Safe":'
+  - '"User":'
+  min_matches: 0
+- sourcetype: beyondtrust:pb
+  category: security
+  vendor: BeyondTrust
+  product: Privileged Access
+  confidence: 0.93
+  required_patterns:
+  - 'BeyondTrust|pbrun\[\d+\]:|pblogd\[\d+\]:'
+  line_patterns:
+  - policy=
+  - user=\w+
+  - command=
+  min_matches: 0
+- sourcetype: imperva:securesphere
+  category: security
+  vendor: Imperva
+  product: SecureSphere WAF
+  confidence: 0.93
+  required_patterns:
+  - imperva|SecureSphere|mx-\w+-\w+.*Alert
+  line_patterns:
+  - alert_name=
+  - severity=
+  - src_ip=\d+
+  min_matches: 0
+- sourcetype: rsa:securid:syslog
+  category: security
+  vendor: RSA
+  product: SecurID Authentication
+  confidence: 0.93
+  required_patterns:
+  - RSA_Authentication_Manager|ACE/Server|radiusd.*RSA
+  line_patterns:
+  - Authenticated=\w+
+  - Failed=\w+
+  - Agent_Host=
+  min_matches: 0
+- sourcetype: snort:log
+  category: security
+  vendor: Snort
+  product: Snort IDS/IPS
+  confidence: 0.97
+  required_patterns:
+  - '\[\d+:\d+:\d+\] .* \[Classification:'
+  line_patterns:
+  - '\[Priority: \d+\]'
+  - (TCP|UDP|ICMP) TTL=\d+
+  - \d+\.\d+\.\d+\.\d+:\d+ -> \d+\.\d+\.\d+\.\d+:\d+
+  min_matches: 0
+- sourcetype: suricata:eve
+  category: security
+  vendor: Suricata
+  product: Suricata EVE JSON
+  confidence: 0.97
+  required_patterns:
+  - '"event_type"\s*:\s*"(alert|dns|http|tls|flow)"'
+  - '"src_ip"\s*:\s*"'
+  line_patterns:
+  - '"dest_ip":'
+  - '"proto":'
+  - '"alert":'
+  - '"signature":'
+  min_matches: 0
+- sourcetype: qualys:vmdr
+  category: security
+  vendor: Qualys
+  product: VMDR
+  confidence: 0.93
+  required_patterns:
+  - '"QUALYS_ID"\s*:|QUALYS.*vulnDetails|RESULT.*QID=\d+'
+  line_patterns:
+  - '"SEVERITY":'
+  - '"TITLE":'
+  - '"PORT":'
+  min_matches: 0
+- sourcetype: tenable:sc
+  category: security
+  vendor: Tenable
+  product: Security Center
+  confidence: 0.93
+  required_patterns:
+  - '"pluginID"\s*:\s*\d+'
+  - '"tenable"|"Nessus"'
+  line_patterns:
+  - '"severity":\s*\d+'
+  - '"pluginName":'
+  - '"cvss3BaseScore":'
+  min_matches: 0
+- sourcetype: rapid7:nexpose
+  category: security
+  vendor: Rapid7
+  product: Nexpose
+  confidence: 0.93
+  required_patterns:
+  - '"nexpose-id"\s*:|"rapid7".*vulnerability|NexposeReport'
+  line_patterns:
+  - <vulnerability id=
+  - <cvss-v2 score=
+  - <proof>
+  min_matches: 0
+- sourcetype: misp:threat_intel
+  category: security
+  vendor: MISP
+  product: Threat Intelligence
+  confidence: 0.93
+  required_patterns:
+  - '"Event"\s*:\s*\{'
+  - '"uuid"\s*:\s*"[a-f0-9\-]+"'
+  line_patterns:
+  - '"Attribute":'
+  - '"Tag":'
+  - '"Galaxy":'
+  min_matches: 0
+- sourcetype: cef
+  category: security
+  vendor: Generic
+  product: Common Event Format (CEF)
+  confidence: 0.95
+  required_patterns:
+  - ^CEF:\d+\|
+  line_patterns:
+  - \|src=\d+
+  - \|dst=\d+
+  - \|deviceAction=
+  - \|msg=
+  min_matches: 0
+- sourcetype: leef
+  category: security
+  vendor: IBM
+  product: Log Event Extended Format (LEEF)
+  confidence: 0.95
+  required_patterns:
+  - ^LEEF:[12]\.\d\|
+  line_patterns:
+  - \|src=\d+
+  - \|dst=\d+
+  - sev=\d+
+  min_matches: 0
+- sourcetype: splunk:es:notable
+  category: security
+  vendor: Splunk
+  product: Enterprise Security Notable
+  confidence: 0.95
+  required_patterns:
+  - '"rule_name"\s*:\s*"'
+  - '"notable_id"\s*:\s*"'
+  line_patterns:
+  - '"urgency":'
+  - '"security_domain":'
+  - '"owner":'
+  min_matches: 0
+- sourcetype: snyk:vulnerabilities
+  category: security
+  vendor: Snyk
+  product: Snyk Vulnerability Report
+  confidence: 0.93
+  required_patterns:
+  - '"issueType"\s*:\s*"(vuln|license)"'
+  - '"snyk"'
+  line_patterns:
+  - '"severity":'
+  - '"packageName":'
+  - '"fixedIn":'
+  min_matches: 0
+- sourcetype: elastic:ecs:json
+  category: security
+  vendor: Elastic
+  product: ECS JSON (Filebeat)
+  confidence: 0.93
+  required_patterns:
+  - '"@timestamp"\s*:\s*"'
+  - '"event\.dataset"\s*:\s*"'
+  line_patterns:
+  - '"host\.name":'
+  - '"agent\.type":'
+  - '"log\.level":'
+  min_matches: 0
+- sourcetype: elastic:ndjson:export
+  category: security
+  vendor: Elastic
+  product: Elasticsearch Export (NDJSON)
+  confidence: 0.92
+  required_patterns:
+  - '"_index"\s*:\s*"'
+  - '"_source"\s*:\s*\{'
+  line_patterns:
+  - '"_id"\s*:\s*"'
+  - '"_type"\s*:'
+  - '"found"\s*:'
+  min_matches: 0
+- sourcetype: activemq:log
+  category: middleware
+  vendor: Apache
+  product: ActiveMQ
+  confidence: 0.95
+  required_patterns:
+  - activemq\.log|ActiveMQ \d+\.\d+\.\d+|org\.apache\.activemq
+  line_patterns:
+  - (INFO|WARN|ERROR)\s+\[
+  - Connector.*started
+  - BrokerService.*Starting
+  min_matches: 0
+- sourcetype: kafka:log
+  category: middleware
+  vendor: Apache
+  product: Kafka
+  confidence: 0.95
+  required_patterns:
+  - \[KafkaServer \d+\]|\[Controller \d+\]|kafka\.server
+  line_patterns:
+  - (INFO|WARN|ERROR) .* (Partition|Broker|Producer|Consumer)
+  - Log segment
+  - Loaded offset
+  min_matches: 0
+- sourcetype: rabbitmq:log
+  category: middleware
+  vendor: RabbitMQ
+  product: RabbitMQ
+  confidence: 0.95
+  required_patterns:
+  - =INFO REPORT====|=WARNING REPORT===|rabbit@\S+
+  line_patterns:
+  - <\d+\.\d+\.\d+>
+  - Starting RabbitMQ
+  - connection (opened|closed)
+  min_matches: 0
+- sourcetype: ibmmq:errorlog
+  category: middleware
+  vendor: IBM
+  product: IBM MQ Error Log
+  confidence: 0.95
+  required_patterns:
+  - AMQ\d{4}[IWES]:|IBM MQ
+  line_patterns:
+  - CSQX\d+E
+  - Queue Manager
+  - 'Channel '
+  min_matches: 0
+- sourcetype: zookeeper:log
+  category: middleware
+  vendor: Apache
+  product: ZooKeeper
+  confidence: 0.95
+  required_patterns:
+  - QuorumPeer\[\S+\]:|org\.apache\.zookeeper
+  line_patterns:
+  - (INFO|WARN|ERROR) .*\[myid:\d+\]
+  - LEADER ELECTION
+  - LEADING|FOLLOWING
+  min_matches: 0
+- sourcetype: nats:log
+  category: middleware
+  vendor: NATS
+  product: NATS Server
+  confidence: 0.93
+  required_patterns:
+  - \[INF\] Starting nats-server|\[INF\] Server is ready
+  line_patterns:
+  - \[(INF|DBG|ERR|WRN|TRC)\]
+  - Listening for client connections
+  - Client connection created
+  min_matches: 0
+- sourcetype: monitoring:nagios
+  category: monitoring
+  vendor: Nagios
+  product: Nagios
+  confidence: 0.95
+  required_patterns:
+  - nagios\[\d+\]:|NAGIOS;|\[HOSTCHECK RESULT\]|\[SERVICE ALERT\]
+  line_patterns:
+  - SERVICE NOTIFICATION
+  - HOST ALERT
+  - CURRENT SERVICE STATE
+  min_matches: 0
+- sourcetype: monitoring:prometheus
+  category: monitoring
+  vendor: Prometheus
+  product: Prometheus
+  confidence: 0.95
+  required_patterns:
+  - ts=\d{4}-\d{2}-\d{2}T.*level=(info|warn|error) caller=
+  - prometheus
+  line_patterns:
+  - component=
+  - msg="
+  - scrape_duration_seconds
+  min_matches: 0
+- sourcetype: icinga:log
+  category: monitoring
+  vendor: Icinga
+  product: Icinga2
+  confidence: 0.93
+  required_patterns:
+  - \[icinga2\] \[\d{4}-\d{2}-\d{2}|\[Icinga 2\]
+  line_patterns:
+  - (information|warning|critical)/\w+
+  - Service Check
+  - Host Check
+  min_matches: 0
+- sourcetype: netapp:ontap:ems
+  category: storage
+  vendor: NetApp
+  product: ONTAP EMS
+  confidence: 0.95
+  required_patterns:
+  - wafl\.|raid\.|disk\.|vol\.|aggr\.
+  - mgmt_log|ontap
+  line_patterns:
+  - ERROR|WARNING|NOTICE
+  - SID=\d+
+  - 'Vserver:'
+  min_matches: 0
+- sourcetype: emc:vnx
+  category: storage
+  vendor: Dell EMC
+  product: VNX/Unity
+  confidence: 0.93
+  required_patterns:
+  - EMC VNX|clariion|DGC|Navisphere
+  line_patterns:
+  - 'SP [AB]:'
+  - 'Fault Code:'
+  - LUN \d+
+  min_matches: 0
+- sourcetype: rubrik:cdm
+  category: storage
+  vendor: Rubrik
+  product: Cloud Data Management
+  confidence: 0.93
+  required_patterns:
+  - '"cluster_id"\s*:\s*"[A-Za-z0-9\-]+".*rubrik'
+  - '"object_type"\s*:\s*"(VirtualMachine|Fileset|MssqlDatabase)"'
+  line_patterns:
+  - '"task_type":'
+  - '"status":'
+  - '"location":'
+  min_matches: 0
+- sourcetype: ot:generic:syslog
+  category: ot
+  vendor: Generic
+  product: OT/ICS Syslog
+  confidence: 0.8
+  required_patterns:
+  - (PLC|SCADA|HMI|RTU|DCS|IED)\s*[-_]?\w+
+  line_patterns:
+  - ModBus|DNP3|IEC-104|PROFINET
+  - tag=\w+
+  - alarm=
+  min_matches: 0
+- sourcetype: claroty
+  category: ot
+  vendor: Claroty
+  product: Claroty OT Security
+  confidence: 0.93
+  required_patterns:
+  - '"vendor"\s*:\s*"Claroty"'
+  - '"site_id"\s*:\s*\d+'
+  line_patterns:
+  - '"alert_type":'
+  - '"asset_id":'
+  - '"protocol":'
+  min_matches: 0
+- sourcetype: ms:dhcp
+  category: network
+  vendor: Microsoft
+  product: Windows DHCP Server
+  confidence: 0.95
+  required_patterns:
+  - ^\d{2},\d{2}/\d{2}/\d{2},\d{2}:\d{2}:\d{2},(10|11|12|13|14|15|16|17)
+  line_patterns:
+  - ',DHCP,'
+  - \d+\.\d+\.\d+\.\d+,\d+\.\d+\.\d+\.\d+
+  - 'QResult:'
+  min_matches: 0
+- sourcetype: netbrain:syslog
+  category: network
+  vendor: NetBrain
+  product: NetBrain Syslog
+  confidence: 0.9
+  required_patterns:
+  - NetBrain|netbrain
+  line_patterns:
+  - Trigger=
+  - DeviceName=
+  - Policy=
+  min_matches: 0
+- sourcetype: coredns:log
+  category: network
+  vendor: CoreDNS
+  product: CoreDNS
+  confidence: 0.95
+  required_patterns:
+  - '\[INFO\] \d+\.\d+\.\d+\.\d+:\d+ - \d+ "(A|AAAA|MX|NS|TXT|PTR|SOA|SRV) '
+  - CoreDNS
+  line_patterns:
+  - NOERROR|NXDOMAIN|SERVFAIL
+  - udp|tcp
+  - IN \d+
+  min_matches: 0
+- sourcetype: netscout:sightline
+  category: network
+  vendor: NetScout
+  product: Sightline
+  confidence: 0.9
+  required_patterns:
+  - arbor|peakflow|sightline.*NetScout
+  line_patterns:
+  - DoS Alert
+  - TMS Mitigation
+  - BGP Flowspec
+  min_matches: 0
+- sourcetype: radware:defensepro
+  category: network
+  vendor: Radware
+  product: DefensePro
+  confidence: 0.93
+  required_patterns:
+  - DefensePro|radware.*attack|Attack-Name=
+  line_patterns:
+  - Attack-Type=
+  - Source-IP=
+  - Destination-IP=
+  min_matches: 0
+- sourcetype: ms:o365:management
+  category: email
+  vendor: Microsoft
+  product: Office 365 Management
+  confidence: 0.95
+  required_patterns:
+  - '"Workload"\s*:\s*"(Exchange|SharePoint|AzureActiveDirectory)"'
+  - '"RecordType"\s*:\s*\d+'
+  line_patterns:
+  - '"Operation":'
+  - '"UserId":'
+  - '"OrganizationId":'
+  min_matches: 0
+- sourcetype: WinEventLog:Security
+  category: windows
+  vendor: Microsoft
+  product: Windows Security (CSV export)
+  confidence: 0.95
+  required_patterns:
+  - EventCode,ComputerName|EventCode=\d+.*ComputerName=
+  line_patterns:
+  - 'Security ID:'
+  - 'Account Name:'
+  - TimeGenerated
+  min_matches: 0
+- sourcetype: pan:traffic
+  category: network
+  vendor: Palo Alto Networks
+  product: NGFW Traffic (CSV export)
+  confidence: 0.93
+  required_patterns:
+  - 'receive_time,serial,type,subtype|Receive Time,Serial #,Type'
+  line_patterns:
+  - srcip,dstip
+  - rule,application,category
+  min_matches: 0
+- sourcetype: csv:generic_firewall
+  category: network
+  vendor: Generic
+  product: Firewall (CSV export)
+  confidence: 0.75
+  required_patterns:
+  - src_ip,dst_ip,src_port,dst_port|source_address,destination_address
+  line_patterns:
+  - action,src,dst,proto
+  - protocol,bytes
+  min_matches: 0
+- sourcetype: json_no_timestamp
+  category: unknown
+  vendor: Generic
+  product: JSON without timestamp
+  confidence: 0.7
+  required_patterns:
+  - ^\s*\{
+  - '"\w+"\s*:\s*"'
+  line_patterns:
+  - '"id"\s*:\s*'
+  - '"type"\s*:\s*"'
+  - '"message"\s*:\s*"'
+  min_matches: 0
+- sourcetype: azure:aad:audit
+  category: cloud
+  vendor: Microsoft
+  product: Azure Active Directory Audit Logs
+  confidence: 0.97
+  required_patterns:
+  - '"category"\s*:\s*"AuditLogs"'
+  - '"operationName"\s*:\s*"'
+  line_patterns:
+  - '"initiatedBy":'
+  - '"targetResources":'
+  - '"loggedByService":'
+  - '"tenantId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:aad:provisioning
+  category: cloud
+  vendor: Microsoft
+  product: Azure AD Provisioning Logs
+  confidence: 0.96
+  required_patterns:
+  - '"category"\s*:\s*"ProvisioningLogs"'
+  - '"provisioningAction"\s*:\s*"'
+  line_patterns:
+  - '"sourceSystem":'
+  - '"targetSystem":'
+  - '"provisioningStatusInfo":'
+  - '"tenantId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:activity
+  category: cloud
+  vendor: Microsoft
+  product: Azure Activity Log
+  confidence: 0.96
+  required_patterns:
+  - '"category"\s*:\s*"Administrative"'
+  - '"resourceProviderName"\s*:\s*"'
+  line_patterns:
+  - '"subscriptionId":'
+  - '"resourceGroupName":'
+  - '"operationName":'
+  - '"caller":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:resource:graph
+  category: cloud
+  vendor: Microsoft
+  product: Azure Resource Graph
+  confidence: 0.94
+  required_patterns:
+  - '"type"\s*:\s*"Microsoft\.'
+  - '"subscriptionId"\s*:\s*"[0-9a-f-]{36}"'
+  line_patterns:
+  - '"resourceGroup":'
+  - '"location":'
+  - '"tenantId":'
+  - '"managedBy":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:securitycenter:alerts
+  category: cloud
+  vendor: Microsoft
+  product: Microsoft Defender for Cloud Alerts
+  confidence: 0.96
+  required_patterns:
+  - '"alertType"\s*:\s*"'
+  - '"productName"\s*:\s*"Azure Security Center"'
+  line_patterns:
+  - '"severity":'
+  - '"compromisedEntity":'
+  - '"subscriptionId":'
+  - '"entities":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:sentinel:incident
+  category: cloud
+  vendor: Microsoft
+  product: Microsoft Sentinel Incidents
+  confidence: 0.96
+  required_patterns:
+  - '"kind"\s*:\s*"Incident"'
+  - '"properties"\s*:\s*\{[^}]*"title"'
+  line_patterns:
+  - '"severity":'
+  - '"status":'
+  - '"owner":'
+  - '"tactics":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:eventhub
+  category: cloud
+  vendor: Microsoft
+  product: Azure Event Hub
+  confidence: 0.93
+  required_patterns:
+  - '"records"\s*:\s*\['
+  - '"resourceId"\s*:\s*"/SUBSCRIPTIONS/'
+  line_patterns:
+  - '"category":'
+  - '"operationName":'
+  - '"time":'
+  - '"correlationId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:cloudtrail:digest
+  category: cloud
+  vendor: Amazon
+  product: AWS CloudTrail Digest
+  confidence: 0.95
+  required_patterns:
+  - '"digestS3Bucket"\s*:\s*"'
+  - '"digestStartTime"\s*:\s*"'
+  line_patterns:
+  - '"previousDigestS3Bucket":'
+  - '"digestEndTime":'
+  - '"awsAccountId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:guardduty
+  category: cloud
+  vendor: Amazon
+  product: AWS GuardDuty
+  confidence: 0.97
+  required_patterns:
+  - '"type"\s*:\s*"[A-Za-z]+/[A-Za-z]+"'
+  - '"service"\s*:\s*\{[^}]*"serviceName"\s*:\s*"guardduty"'
+  line_patterns:
+  - '"severity":'
+  - '"accountId":'
+  - '"region":'
+  - '"title":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:inspector
+  category: cloud
+  vendor: Amazon
+  product: AWS Inspector
+  confidence: 0.94
+  required_patterns:
+  - '"inspectorScore"\s*:\s*'
+  - '"packageVulnerabilityDetails"\s*:\s*\{'
+  line_patterns:
+  - '"findingArn":'
+  - '"awsAccountId":'
+  - '"severity":'
+  - '"resources":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:securityhub
+  category: cloud
+  vendor: Amazon
+  product: AWS Security Hub
+  confidence: 0.96
+  required_patterns:
+  - '"SchemaVersion"\s*:\s*"2018-10-08"'
+  - '"ProductArn"\s*:\s*"arn:aws:securityhub'
+  line_patterns:
+  - '"Severity":'
+  - '"Resources":'
+  - '"Compliance":'
+  - '"WorkflowState":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:config
+  category: cloud
+  vendor: Amazon
+  product: AWS Config
+  confidence: 0.94
+  required_patterns:
+  - '"configurationItemStatus"\s*:\s*"'
+  - '"resourceType"\s*:\s*"AWS::'
+  line_patterns:
+  - '"awsRegion":'
+  - '"awsAccountId":'
+  - '"configuration":'
+  - '"tags":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:elb:accesslogs
+  category: cloud
+  vendor: Amazon
+  product: AWS ELB Access Logs
+  confidence: 0.94
+  required_patterns:
+  - \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z\s+\S+-loadbalancer\S+\s+
+  - \d+\.\d+\.\d+\.\d+:\d+\s+\d+\.\d+\.\d+\.\d+:\d+
+  line_patterns:
+  - HTTP/1
+  - HTTPS
+  - '"[A-Z]+ /'
+  - arn:aws:elasticloadbalancing
+  min_matches: 0
+  filter_mode: line
+  line_filter: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}
+- sourcetype: aws:cloudwatch:logs
+  category: cloud
+  vendor: Amazon
+  product: AWS CloudWatch Logs
+  confidence: 0.93
+  required_patterns:
+  - '"logEvents"\s*:\s*\['
+  - '"logGroup"\s*:\s*"'
+  line_patterns:
+  - '"logStream":'
+  - '"subscriptionFilters":'
+  - '"messageType":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:route53:logs
+  category: cloud
+  vendor: Amazon
+  product: AWS Route53 DNS Logs
+  confidence: 0.94
+  required_patterns:
+  - \d\.\d\s+\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\s+Z[A-Z0-9]+\s+
+  line_patterns:
+  - NOERROR
+  - NXDOMAIN
+  - A\s+IP4
+  - AAAA\s+IP6
+  min_matches: 0
+  filter_mode: line
+  line_filter: ^\d\.\d\s+\d{4}-\d{2}-\d{2}T
+- sourcetype: aws:waf
+  category: cloud
+  vendor: Amazon
+  product: AWS WAF Logs
+  confidence: 0.96
+  required_patterns:
+  - '"webaclId"\s*:\s*"arn:aws:wafv2'
+  - '"action"\s*:\s*"(ALLOW|BLOCK|COUNT)"'
+  line_patterns:
+  - '"httpRequest":'
+  - '"ruleGroupList":'
+  - '"terminatingRuleId":'
+  - '"httpSourceName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: aws:iam:accessadvisor
+  category: cloud
+  vendor: Amazon
+  product: AWS IAM Access Advisor
+  confidence: 0.93
+  required_patterns:
+  - '"ServiceName"\s*:\s*"'
+  - '"ServiceNamespace"\s*:\s*"'
+  line_patterns:
+  - '"LastAuthenticated":'
+  - '"TotalAuthenticatedEntities":'
+  - '"LastAuthenticatedEntity":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: aws:sqs
+  category: cloud
+  vendor: Amazon
+  product: AWS SQS
+  confidence: 0.92
+  required_patterns:
+  - '"MessageId"\s*:\s*"[0-9a-f-]{36}"'
+  - '"ReceiptHandle"\s*:\s*"'
+  line_patterns:
+  - '"MD5OfBody":'
+  - '"Body":'
+  - '"Attributes":'
+  - '"ApproximateReceiveCount":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: gcp:pubsub:message
+  category: cloud
+  vendor: Google
+  product: GCP Pub/Sub
+  confidence: 0.93
+  required_patterns:
+  - '"subscription"\s*:\s*"projects/.*/subscriptions/'
+  - '"message"\s*:\s*\{[^}]*"data"'
+  line_patterns:
+  - '"messageId":'
+  - '"publishTime":'
+  - '"attributes":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: gcp:compute:firewall
+  category: cloud
+  vendor: Google
+  product: GCP VPC Firewall
+  confidence: 0.95
+  required_patterns:
+  - '"logName"\s*:\s*"projects/.*/logs/compute.googleapis.com%2Ffirewall"'
+  line_patterns:
+  - '"connection":'
+  - '"disposition":'
+  - '"firewallRule":'
+  - '"instance":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: gcp:dns:query
+  category: cloud
+  vendor: Google
+  product: GCP Cloud DNS
+  confidence: 0.94
+  required_patterns:
+  - '"logName"\s*:\s*"projects/.*/logs/dns.googleapis.com%2Fdns_queries"'
+  line_patterns:
+  - '"queryName":'
+  - '"queryType":'
+  - '"responseCode":'
+  - '"sourceNetwork":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: gcp:iam:policy
+  category: cloud
+  vendor: Google
+  product: GCP IAM Policy
+  confidence: 0.94
+  required_patterns:
+  - '"logName"\s*:\s*"projects/.*/logs/cloudaudit.googleapis.com%2Fdata_access"'
+  - '"serviceName"\s*:\s*"iam.googleapis.com"'
+  line_patterns:
+  - '"methodName":'
+  - '"principalEmail":'
+  - '"resourceName":'
+  - '"policyDelta":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: gcp:securitycenter:findings
+  category: cloud
+  vendor: Google
+  product: GCP Security Command Center
+  confidence: 0.95
+  required_patterns:
+  - '"finding"\s*:\s*\{[^}]*"name"\s*:\s*"organizations/\d+/sources/\d+/findings/'
+  line_patterns:
+  - '"severity":'
+  - '"category":'
+  - '"state":'
+  - '"resourceName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: ms:o365:defender:atp
+  category: endpoint
+  vendor: Microsoft
+  product: Microsoft Defender for Endpoint
+  confidence: 0.96
+  required_patterns:
+  - '"category"\s*:\s*"(AntivirusDetection|BehaviorPrevented|ConnectionSuccess|FileCreated)"'
+  - '"MachineId"\s*:\s*"[0-9a-f]{40}"'
+  line_patterns:
+  - '"DeviceName":'
+  - '"FileName":'
+  - '"InitiatingProcessName":'
+  - '"ReportId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: ms:o365:exchange:messageTrace
+  category: email
+  vendor: Microsoft
+  product: Office 365 Exchange Message Trace
+  confidence: 0.95
+  required_patterns:
+  - '"MessageTraceId"\s*:\s*"[0-9a-f-]{36}"'
+  - '"RecipientAddress"\s*:\s*"[^"]+@[^"]+"'
+  line_patterns:
+  - '"SenderAddress":'
+  - '"Subject":'
+  - '"Status":'
+  - '"Organization":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: ms:o365:dlp:all
+  category: email
+  vendor: Microsoft
+  product: Office 365 DLP
+  confidence: 0.95
+  required_patterns:
+  - '"Workload"\s*:\s*"(Exchange|SharePoint|OneDrive|Teams)"'
+  - '"PolicyDetails"\s*:\s*\['
+  line_patterns:
+  - '"SensitiveInfoDetectionIsIncluded":'
+  - '"ExceptionInfo":'
+  - '"Operation":\s*"DlpRuleMatch"'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: ms:aad:riskyuser
+  category: cloud
+  vendor: Microsoft
+  product: Azure AD Risky Users
+  confidence: 0.95
+  required_patterns:
+  - '"riskLevel"\s*:\s*"(high|medium|low|none|hidden)"'
+  - '"riskState"\s*:\s*"(atRisk|confirmedCompromised|remediated|dismissed)"'
+  line_patterns:
+  - '"userPrincipalName":'
+  - '"riskLastUpdatedDateTime":'
+  - '"id":\s*"[0-9a-f-]{36}"'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: ms:aad:riskDetection
+  category: cloud
+  vendor: Microsoft
+  product: Azure AD Risk Detections
+  confidence: 0.95
+  required_patterns:
+  - '"riskEventType"\s*:\s*"'
+  - '"detectionTimingType"\s*:\s*"(realtime|offline|nearRealtime)"'
+  line_patterns:
+  - '"riskLevel":'
+  - '"userPrincipalName":'
+  - '"ipAddress":'
+  - '"location":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: okta:im2:log
+  category: security
+  vendor: Okta
+  product: Okta Identity Engine Logs
+  confidence: 0.95
+  required_patterns:
+  - '"eventType"\s*:\s*"'
+  - '"actor"\s*:\s*\{[^}]*"type"\s*:\s*"User"'
+  line_patterns:
+  - '"outcome":'
+  - '"client":'
+  - '"target":'
+  - '"authenticationContext":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: crowdstrike:fdr:json
+  category: endpoint
+  vendor: CrowdStrike
+  product: Falcon Data Replicator
+  confidence: 0.95
+  required_patterns:
+  - '"event_platform"\s*:\s*"(Win|Mac|Lin)"'
+  - '"event_simpleName"\s*:\s*"'
+  line_patterns:
+  - '"aid":'
+  - '"cid":'
+  - '"ContextTimeStamp":'
+  - '"ComputerName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: crowdstrike:telemetry:events
+  category: endpoint
+  vendor: CrowdStrike
+  product: Falcon Telemetry Events
+  confidence: 0.94
+  required_patterns:
+  - '"metadata"\s*:\s*\{[^}]*"customerIDString"\s*:\s*"'
+  - '"event"\s*:\s*\{[^}]*"ProcessStartTime"'
+  line_patterns:
+  - '"FileName":'
+  - '"CommandLine":'
+  - '"SHA256HashData":'
+  - '"UserName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: pan:globalprotect
+  category: network
+  vendor: Palo Alto Networks
+  product: GlobalProtect VPN
+  confidence: 0.95
+  required_patterns:
+  - ',GLOBALPROTECT,'
+  - (gateway-auth|portal-auth|tunnel-reestablished)
+  line_patterns:
+  - public-ip
+  - private-ip
+  - login-duration
+  - stage
+  min_matches: 0
+  filter_mode: line
+  line_filter: ',GLOBALPROTECT,'
+- sourcetype: pan:hipmatch
+  category: network
+  vendor: Palo Alto Networks
+  product: PAN-OS HIP Match
+  confidence: 0.94
+  required_patterns:
+  - ',HIPMATCH,'
+  line_patterns:
+  - matchname
+  - matchtype
+  - machinename
+  min_matches: 0
+  filter_mode: line
+  line_filter: ',HIPMATCH,'
+- sourcetype: pan:decryption
+  category: network
+  vendor: Palo Alto Networks
+  product: PAN-OS Decryption
+  confidence: 0.94
+  required_patterns:
+  - ',DECRYPTION,'
+  line_patterns:
+  - tls-version
+  - tls-keyxchg
+  - tls-enc
+  - server-name-indication
+  min_matches: 0
+  filter_mode: line
+  line_filter: ',DECRYPTION,'
+- sourcetype: cisco:duo:admin
+  category: cisco
+  vendor: Cisco
+  product: Cisco Duo Admin API
+  confidence: 0.94
+  required_patterns:
+  - '"action"\s*:\s*"(admin_login|admin_create|admin_update|user_create|user_update|bypass_create)"'
+  - '"username"\s*:\s*"'
+  line_patterns:
+  - '"ip_address":'
+  - '"description":'
+  - '"isotimestamp":'
+  - '"timestamp":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:duo:authentication
+  category: cisco
+  vendor: Cisco
+  product: Cisco Duo Authentication Logs
+  confidence: 0.95
+  required_patterns:
+  - '"event_type"\s*:\s*"(authentication|enrollment)"'
+  - '"result"\s*:\s*"(success|failure|denied|fraud)"'
+  line_patterns:
+  - '"factor":'
+  - '"device":'
+  - '"user":'
+  - '"access_device":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:amp
+  category: endpoint
+  vendor: Cisco
+  product: Cisco Secure Endpoint (AMP)
+  confidence: 0.95
+  required_patterns:
+  - '"event_type"\s*:\s*\d+'
+  - '"computer"\s*:\s*\{[^}]*"connector_guid"'
+  line_patterns:
+  - '"severity":'
+  - '"file":'
+  - '"network_info":'
+  - '"tactics":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: cisco:sdwan:vmanage
+  category: network
+  vendor: Cisco
+  product: Cisco SD-WAN vManage
+  confidence: 0.93
+  required_patterns:
+  - vmanage#
+  - '%VMANAGE-'
+  line_patterns:
+  - vedge
+  - vsmart
+  - vbond
+  - system-ip
+  min_matches: 0
+  filter_mode: line
+  line_filter: vmanage#|%VMANAGE-
+- sourcetype: cisco:ciscosecure:email
+  category: email
+  vendor: Cisco
+  product: Cisco Secure Email (ESA/IronPort)
+  confidence: 0.94
+  required_patterns:
+  - ICID \d+|DCID \d+|MID \d+
+  - Cisco\s+(IronPort|Email Security Appliance|ESA)
+  line_patterns:
+  - ICID
+  - DCID
+  - MID
+  - RID
+  - quarantine
+  min_matches: 0
+  filter_mode: line
+  line_filter: ICID \d+|DCID \d+|MID \d+
+- sourcetype: fgt_vpn
+  category: network
+  vendor: Fortinet
+  product: FortiGate VPN
+  confidence: 0.95
+  required_patterns:
+  - type=vpn
+  line_patterns:
+  - action=
+  - tunnelip=
+  - remip=
+  - user=
+  min_matches: 0
+  filter_mode: line
+  line_filter: type=vpn
+- sourcetype: fgt_waf
+  category: network
+  vendor: Fortinet
+  product: FortiGate WAF
+  confidence: 0.94
+  required_patterns:
+  - type=waf
+  line_patterns:
+  - action=
+  - attacktype=
+  - severity=
+  - uri=
+  min_matches: 0
+  filter_mode: line
+  line_filter: type=waf
+- sourcetype: sentinelone:activity
+  category: endpoint
+  vendor: SentinelOne
+  product: SentinelOne Activity Logs
+  confidence: 0.94
+  required_patterns:
+  - '"activityType"\s*:\s*\d+'
+  - '"primaryDescription"\s*:\s*"'
+  line_patterns:
+  - '"agentId":'
+  - '"groupName":'
+  - '"siteId":'
+  - '"accountId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: sentinelone:threat
+  category: endpoint
+  vendor: SentinelOne
+  product: SentinelOne Threats
+  confidence: 0.96
+  required_patterns:
+  - '"threatInfo"\s*:\s*\{'
+  - '"agentDetectionInfo"\s*:\s*\{'
+  line_patterns:
+  - '"mitigationStatus":'
+  - '"classification":'
+  - '"confidenceLevel":'
+  - '"threatName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: stash
+  category: security
+  vendor: Splunk
+  product: Splunk ES Notable Events
+  confidence: 0.93
+  required_patterns:
+  - \*\*\*SPLUNK_CRED_STORE\*\*\*|event_id=\S+\s+search_name=
+  line_patterns:
+  - urgency=
+  - rule_name=
+  - src=
+  - dest=
+  min_matches: 0
+  filter_mode: line
+  line_filter: event_id=\S+\s+search_name=
+- sourcetype: zeek:dhcp
+  category: network
+  vendor: Zeek
+  product: Zeek DHCP Log
+  confidence: 0.94
+  required_patterns:
+  - '#path\s+dhcp'
+  - '#fields\s+ts\s+uids'
+  line_patterns:
+  - assigned_ip
+  - lease_time
+  - client_message
+  - server_message
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: zeek_tsv
+- sourcetype: zeek:ssl
+  category: network
+  vendor: Zeek
+  product: Zeek SSL/TLS Log
+  confidence: 0.94
+  required_patterns:
+  - '#path\s+ssl'
+  - '#fields\s+ts\s+uid'
+  line_patterns:
+  - version
+  - cipher
+  - server_name
+  - validation_status
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: zeek_tsv
+- sourcetype: zeek:files
+  category: network
+  vendor: Zeek
+  product: Zeek Files Log
+  confidence: 0.93
+  required_patterns:
+  - '#path\s+files'
+  - '#fields\s+ts\s+fuid'
+  line_patterns:
+  - mime_type
+  - md5
+  - sha1
+  - filename
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: zeek_tsv
+- sourcetype: zeek:weird
+  category: network
+  vendor: Zeek
+  product: Zeek Weird Log
+  confidence: 0.93
+  required_patterns:
+  - '#path\s+weird'
+  - '#fields\s+ts\s+uid'
+  line_patterns:
+  - name
+  - notice
+  - peer
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: zeek_tsv
+- sourcetype: zeek:notice
+  category: network
+  vendor: Zeek
+  product: Zeek Notice Log
+  confidence: 0.94
+  required_patterns:
+  - '#path\s+notice'
+  - '#fields\s+ts\s+uid'
+  line_patterns:
+  - note
+  - msg
+  - actions
+  - dropped
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: zeek_tsv
+- sourcetype: WinEventLog:Microsoft-Windows-Bits-Client/Operational
+  category: windows
+  vendor: Microsoft
+  product: Windows BITS Client
+  confidence: 0.93
+  required_patterns:
+  - <Channel>Microsoft-Windows-Bits-Client/Operational</Channel>
+  line_patterns:
+  - <EventID>
+  - RemoteName
+  - TransferType
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: WinEventLog:Microsoft-Windows-DNS-Client/Operational
+  category: windows
+  vendor: Microsoft
+  product: Windows DNS Client
+  confidence: 0.93
+  required_patterns:
+  - <Channel>Microsoft-Windows-DNS-Client/Operational</Channel>
+  line_patterns:
+  - <EventID>
+  - QueryName
+  - QueryType
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: WinEventLog:Microsoft-Windows-Windows Firewall With Advanced Security/Firewall
+  category: windows
+  vendor: Microsoft
+  product: Windows Firewall
+  confidence: 0.94
+  required_patterns:
+  - <Channel>Microsoft-Windows-Windows Firewall With Advanced Security/Firewall</Channel>
+  line_patterns:
+  - <EventID>
+  - RuleName
+  - Protocol
+  - Direction
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: XmlWinEventLog:Microsoft-Windows-Sysmon/Operational
+  category: windows
+  vendor: Microsoft
+  product: Sysmon (XML format)
+  confidence: 0.95
+  required_patterns:
+  - <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+  - <Provider Name=.Microsoft-Windows-Sysmon.
+  line_patterns:
+  - <EventID>
+  - ProcessGuid
+  - Image
+  - CommandLine
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: linux:audit:syslog
+  category: linux
+  vendor: Linux
+  product: Linux Audit Daemon (syslog bridge)
+  confidence: 0.92
+  required_patterns:
+  - \bkernel\b.*\btype=[A-Z_]+\b.*\bpid=\d+
+  - audit\(\d+\.\d+:\d+\)
+  line_patterns:
+  - auid=
+  - ses=
+  - uid=
+  - gid=
+  min_matches: 0
+  filter_mode: line
+  line_filter: audit\(|type=[A-Z_]+\b.*pid=
+- sourcetype: linux:auth
+  category: linux
+  vendor: Linux
+  product: Linux Auth Log (/var/log/auth.log)
+  confidence: 0.93
+  required_patterns:
+  - '(sudo|su|sshd|pam_unix|login|passwd)\[\d+\]:'
+  - (Accepted|Failed) (password|publickey) for
+  line_patterns:
+  - session opened
+  - session closed
+  - authentication failure
+  - Invalid user
+  min_matches: 0
+  filter_mode: line
+  line_filter: '(sudo|su|sshd|pam_unix|login|passwd)\[\d+\]:'
+- sourcetype: juniper:srx
+  category: network
+  vendor: Juniper
+  product: Juniper SRX Firewall
+  confidence: 0.95
+  required_patterns:
+  - RT_FLOW_SESSION_(CREATE|CLOSE|DENY)|APPTRACK_SESSION_(CREATE|CLOSE)
+  line_patterns:
+  - session-created
+  - session-closed
+  - reason=
+  - service-name=
+  min_matches: 0
+  filter_mode: line
+  line_filter: RT_FLOW_SESSION|APPTRACK_SESSION
+- sourcetype: aruba:clearpass
+  category: network
+  vendor: Aruba
+  product: Aruba ClearPass NAC
+  confidence: 0.93
+  required_patterns:
+  - ClearPass|ArubaOS-CX|aruba-cppm
+  line_patterns:
+  - RADIUS
+  - Auth.Session
+  - Endpoint
+  - Service
+  min_matches: 0
+  filter_mode: line
+  line_filter: ClearPass|aruba-cppm|ArubaOS
+- sourcetype: cisco:acs
+  category: cisco
+  vendor: Cisco
+  product: Cisco ACS / ISE RADIUS
+  confidence: 0.93
+  required_patterns:
+  - 'CSCOacs_|CiscoSecure ACS|RADIUS: (Accept|Reject)'
+  line_patterns:
+  - Auth.Type=
+  - Authen-Type=
+  - Device IP Address=
+  - User-Name=
+  min_matches: 0
+  filter_mode: line
+  line_filter: 'CSCOacs_|RADIUS: (Accept|Reject)'
+- sourcetype: pulse:secure:vpn
+  category: network
+  vendor: Ivanti
+  product: Ivanti/Pulse Secure VPN
+  confidence: 0.93
+  required_patterns:
+  - PulseSecure:|Juniper Networks Secure Access SSL VPN
+  line_patterns:
+  - AUT24326
+  - AUT24327
+  - AUT22880
+  - authenticated
+  - logged out
+  min_matches: 0
+  filter_mode: line
+  line_filter: PulseSecure:|Secure Access SSL VPN
+- sourcetype: carbonblack:defense:json
+  category: endpoint
+  vendor: VMware
+  product: Carbon Black Cloud (Defense)
+  confidence: 0.95
+  required_patterns:
+  - '"type"\s*:\s*"ENDPOINT_(EVENT|NOTIFICATION)"'
+  - '"deviceInfo"\s*:\s*\{[^}]*"deviceId"'
+  line_patterns:
+  - '"policyName":'
+  - '"targetApp":'
+  - '"processDetails":'
+  - '"threatInfo":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: tenable:io:assets
+  category: security
+  vendor: Tenable
+  product: Tenable.io Assets
+  confidence: 0.94
+  required_patterns:
+  - '"has_agent"\s*:\s*(true|false)'
+  - '"last_seen"\s*:\s*"\d{4}-\d{2}-\d{2}T'
+  line_patterns:
+  - '"ipv4s":'
+  - '"fqdns":'
+  - '"netbios_name":'
+  - '"operating_systems":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: wineventlog:security:enhanced
+  category: windows
+  vendor: Microsoft
+  product: Windows Security (Enhanced Logging)
+  confidence: 0.94
+  required_patterns:
+  - '"EventID"\s*:\s*(4624|4625|4648|4688|4698|4702|4720|4726|4740)'
+  - '"Channel"\s*:\s*"Security"'
+  line_patterns:
+  - '"SubjectUserName":'
+  - '"TargetUserName":'
+  - '"IpAddress":'
+  - '"ProcessName":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:audit
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vManage Audit Log
+  confidence: 0.95
+  required_patterns:
+  - '"logid"\s*:\s*"\d+"'
+  - '"entry_time"\s*:\s*\d+'
+  line_patterns:
+  - '"user":'
+  - '"ipaddr":'
+  - '"message":'
+  - '"severity":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:alarms
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vManage Alarms
+  confidence: 0.95
+  required_patterns:
+  - '"alarm_id"\s*:\s*"[0-9a-f-]+"'
+  - '"type"\s*:\s*"(major|minor|critical|medium)"'
+  line_patterns:
+  - '"system-ip":'
+  - '"host-name":'
+  - '"rulename":'
+  - '"acknowledged":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:events
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vManage Events
+  confidence: 0.95
+  required_patterns:
+  - '"eventname"\s*:\s*"'
+  - '"system-ip"\s*:\s*"\d+\.\d+\.\d+\.\d+"'
+  line_patterns:
+  - '"severity-level":'
+  - '"host-name":'
+  - '"site-id":'
+  - '"component":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:statistics
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vManage Statistics
+  confidence: 0.94
+  required_patterns:
+  - '"vdevice-name"\s*:\s*"'
+  - '"vdevice-host-name"\s*:\s*"'
+  line_patterns:
+  - '"vdevice-dataKey":'
+  - '"lastupdated":'
+  - '"tenant":'
+  - '"vmanage-system-ip":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:device
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN Device Inventory
+  confidence: 0.93
+  required_patterns:
+  - '"deviceType"\s*:\s*"(vedge|vsmart|vbond|vmanage)"'
+  - '"personality"\s*:\s*"(vedge|vsmart|vbond|vmanage)"'
+  line_patterns:
+  - '"system-ip":'
+  - '"site-id":'
+  - '"uuid":'
+  - '"validity":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vedge
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vEdge Router
+  confidence: 0.94
+  required_patterns:
+  - 'vedge-\S+|vEdge\d*\s+\S+\[\d+\]:'
+  - '(SYSTEM|IPSEC|BFD|OMP|TLOC|SDWAN)\s+(\d+\s+)?\S+:'
+  line_patterns:
+  - system-ip=
+  - site-id=
+  - color=
+  - remote-system-ip=
+  min_matches: 0
+  filter_mode: line
+  line_filter: vedge-|vEdge\d*|TLOC|SDWAN.*system-ip
+- sourcetype: cisco:sdwan:cedge
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN cEdge (IOS-XE) Router
+  confidence: 0.94
+  required_patterns:
+  - '%SDWAN-(\d+-)?[A-Z_]+:'
+  - '%IOSXE_SDWAN-'
+  line_patterns:
+  - system-ip=
+  - site-id=
+  - color=
+  - bfd-state=
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%SDWAN-|%IOSXE_SDWAN-'
+- sourcetype: cisco:sdwan:vmanage:bfd
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN BFD Sessions
+  confidence: 0.93
+  required_patterns:
+  - '"state"\s*:\s*"(up|down)"'
+  - '"proto"\s*:\s*"bfd"'
+  line_patterns:
+  - '"system-ip":'
+  - '"local-color":'
+  - '"remote-color":'
+  - '"tx-pkts":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:ipsec
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN IPSec Statistics
+  confidence: 0.93
+  required_patterns:
+  - '"if-name"\s*:\s*"ipsec\d+"'
+  - '"tx-pkts"\s*:\s*\d+'
+  line_patterns:
+  - '"rx-pkts":'
+  - '"tx-octets":'
+  - '"rx-octets":'
+  - '"pmtu":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:omp
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN OMP Routes
+  confidence: 0.93
+  required_patterns:
+  - '"vpn-id"\s*:\s*"\d+"'
+  - '"from-peer"\s*:\s*"\d+\.\d+\.\d+\.\d+"'
+  line_patterns:
+  - '"prefix":'
+  - '"label":'
+  - '"color":'
+  - '"originator":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vmanage:interface
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN Interface Statistics
+  confidence: 0.92
+  required_patterns:
+  - '"if-name"\s*:\s*"(ge|eth|mpls|biz-internet|public-internet)\S*"'
+  - '"tx-kbps"\s*:\s*\d+'
+  line_patterns:
+  - '"rx-kbps":'
+  - '"tx-pps":'
+  - '"rx-pps":'
+  - '"vdevice-name":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:sdwan:vsyslog
+  category: cisco
+  vendor: Cisco
+  product: Cisco SD-WAN vsyslog (Viptela OS Daemon Syslog)
+  confidence: 0.96
+  required_patterns:
+  - '%Viptela-\S+-\S+-\d+-[A-Z]+-\d+:'
+  line_patterns:
+  - 'VDAEMON_\d+\[\d+\]:'
+  - 'SYSMGR\[\d+\]:'
+  - 'FTMD\[\d+\]:|OMPD\[\d+\]:|BFDD\[\d+\]:|VCONFD\[\d+\]:|VDAEMON\[\d+\]:'
+  - severity-level:(critical|major|minor|warning)
+  - system-ip:\d+\.\d+\.\d+\.\d+
+  - personality:(vedge|vsmart|vbond|vmanage)
+  - 'local7\.(info|notice|warning|err|crit|alert|emerg):'
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%Viptela-\S+-\S+-\d+-[A-Z]+-\d+:'
+- sourcetype: cisco:catalyst
+  category: cisco
+  vendor: Cisco
+  product: Cisco Catalyst Switch
+  confidence: 0.93
+  required_patterns:
+  - '%LINK-\d-CHANGED|%LINEPROTO-\d-UPDOWN|%SYS-\d-CONFIG_I'
+  line_patterns:
+  - FastEthernet
+  - GigabitEthernet
+  - TenGigabitEthernet
+  - changed state to
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%LINK-\d-CHANGED|%LINEPROTO-\d-UPDOWN|%SYS-\d-|%CATALYST'
+- sourcetype: cisco:ftd
+  category: cisco
+  vendor: Cisco
+  product: Cisco Firepower Threat Defense (FTD)
+  confidence: 0.95
+  required_patterns:
+  - '%FTD-([a-z]+-)*\d+-\d+:'
+  line_patterns:
+  - Built (inbound|outbound)
+  - Teardown
+  - Deny
+  - permit
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%FTD-([a-z]+-)*\d+-\d+:'
+- sourcetype: cisco:hyperflex
+  category: cisco
+  vendor: Cisco
+  product: Cisco HyperFlex HCI
+  confidence: 0.91
+  required_patterns:
+  - '"cluster"\s*:\s*"HX-'
+  - '"objectType"\s*:\s*"(HyperFlex|Hx)'
+  line_patterns:
+  - '"severity":'
+  - '"description":'
+  - '"entityName":'
+  - '"faultCode":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: cisco:ucs
+  category: cisco
+  vendor: Cisco
+  product: Cisco UCS Manager
+  confidence: 0.92
+  required_patterns:
+  - '%UCS-\d-\S+:|ucs-(\d+)-'
+  line_patterns:
+  - severity=
+  - affected-dn=
+  - cause=
+  - creation-time=
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%UCS-\d-|ucs-\d-'
+- sourcetype: cisco:tetration
+  category: cisco
+  vendor: Cisco
+  product: Cisco Secure Workload (Tetration)
+  confidence: 0.93
+  required_patterns:
+  - '"src_address"\s*:\s*"\d+\.\d+\.\d+\.\d+"'
+  - '"policy_action"\s*:\s*"(ALLOW|DENY|DROP)"'
+  line_patterns:
+  - '"dst_address":'
+  - '"proto":'
+  - '"src_port":'
+  - '"vrf_name":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:dnac
+  category: cisco
+  vendor: Cisco
+  product: Cisco DNA Center / Catalyst Center
+  confidence: 0.93
+  required_patterns:
+  - '"instanceId"\s*:\s*"[0-9a-f-]{36}"'
+  - '"category"\s*:\s*"(ASSURANCE|NETWORK|SYSTEM|APPLICATION)"'
+  line_patterns:
+  - '"severity":'
+  - '"details":'
+  - '"deviceId":'
+  - '"siteId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: cisco:stealthwatch
+  category: cisco
+  vendor: Cisco
+  product: Cisco Secure Network Analytics (Stealthwatch)
+  confidence: 0.93
+  required_patterns:
+  - '"domain_id"\s*:\s*\d+'
+  - '"security_events"\s*:\s*\[|smc_id=\d+'
+  line_patterns:
+  - '"start_active_time":'
+  - '"end_active_time":'
+  - '"peer_start_ip":'
+  - '"flow_count":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: cisco:thousandeyes
+  category: cisco
+  vendor: Cisco
+  product: Cisco ThousandEyes
+  confidence: 0.93
+  required_patterns:
+  - '"testId"\s*:\s*\d+'
+  - '"agentId"\s*:\s*\d+'
+  line_patterns:
+  - '"testName":'
+  - '"permalink":'
+  - '"roundId":'
+  - '"network":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: vmware:vsphere:esx:syslog
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Syslog
+  confidence: 0.94
+  required_patterns:
+  - '(Hostd|Vpxa|vmkernel|fdm|vobd)\[\S+\]:'
+  - 'ESX(i)?\s+\S+\s+\S+\[\d+\]:'
+  line_patterns:
+  - vmkernel
+  - Hostd
+  - Vpxa
+  - 'cpu\d+:'
+  - NMP
+  - SCSI
+  - vmnic
+  min_matches: 0
+  filter_mode: line
+  line_filter: Hostd\[|Vpxa\[|vmkernel|fdm\[|vobd\[
+- sourcetype: vmware:vsphere:vcenter:syslog
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter Server Syslog
+  confidence: 0.94
+  required_patterns:
+  - vpxd\[|vpxd-svcs\[|vcsServiceManager\[|vsphere-ui\[
+  line_patterns:
+  - vim.host
+  - vim.vm
+  - SessionManager
+  - VirtualMachine
+  - HostSystem
+  min_matches: 0
+  filter_mode: line
+  line_filter: vpxd\[|vpxd-svcs\[|vcsServiceManager\[|vsphere-ui\[
+- sourcetype: vmware:vsphere:vcenter:audit
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter Audit Events
+  confidence: 0.93
+  required_patterns:
+  - '"eventTypeId"\s*:\s*"com\.vmware\.'
+  - '"userName"\s*:\s*"[^"]+"'
+  line_patterns:
+  - '"datacenter":'
+  - '"computeResource":'
+  - '"host":'
+  - '"vm":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: vmware:nsx:firewall
+  category: infrastructure
+  vendor: VMware
+  product: VMware NSX Distributed Firewall
+  confidence: 0.95
+  required_patterns:
+  - FIREWALL.*rule_id=\d+.*action=(ALLOW|DROP|REJECT)
+  - NSX.*dfwpktlogs
+  line_patterns:
+  - src=
+  - dst=
+  - proto=
+  - rule_id=
+  min_matches: 0
+  filter_mode: line
+  line_filter: FIREWALL.*rule_id=|dfwpktlogs
+- sourcetype: vmware:nsx:syslog
+  category: infrastructure
+  vendor: VMware
+  product: VMware NSX Manager Syslog
+  confidence: 0.93
+  required_patterns:
+  - nsx-manager|nsx_manager|com\.vmware\.nsx
+  - '(NSX|nsx)-(\w+-)?\d+\s+\S+\[\d+\]:'
+  line_patterns:
+  - NSX
+  - nsx
+  - transport-node
+  - logical-switch
+  - firewall
+  min_matches: 0
+  filter_mode: line
+  line_filter: nsx-manager|nsx_manager|com\.vmware\.nsx
+- sourcetype: vmware:nsx:audit
+  category: infrastructure
+  vendor: VMware
+  product: VMware NSX Audit Log
+  confidence: 0.94
+  required_patterns:
+  - '"requestMethod"\s*:\s*"(GET|POST|PUT|DELETE|PATCH)"'
+  - '"requestUri"\s*:\s*"/api/v\d+/'
+  line_patterns:
+  - '"responseCode":'
+  - '"clientIp":'
+  - '"user":'
+  - '"requestId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: vmware:horizon:syslog
+  category: infrastructure
+  vendor: VMware
+  product: VMware Horizon VDI
+  confidence: 0.93
+  required_patterns:
+  - '(ConnectionServer|ViewConnectionServer|cs-\S+)\s+\S+\[\d+\]:'
+  - BROKER\s+.*UserLoggedIn|BROKER\s+.*SessionDisconnected
+  line_patterns:
+  - ConnectionServer
+  - BROKER
+  - AGENT
+  - SESSION
+  - user=
+  min_matches: 0
+  filter_mode: line
+  line_filter: ConnectionServer|BROKER|ViewConnectionServer
+- sourcetype: vmware:aria:operations
+  category: infrastructure
+  vendor: VMware
+  product: VMware Aria Operations (vROps)
+  confidence: 0.92
+  required_patterns:
+  - '"resourceKind"\s*:\s*"(VirtualMachine|HostSystem|ClusterComputeResource)"'
+  - '"adapterKind"\s*:\s*"VMWARE"'
+  line_patterns:
+  - '"resourceName":'
+  - '"health":'
+  - '"riskLevel":'
+  - '"efficiencyLevel":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: vmware:aria:logs
+  category: infrastructure
+  vendor: VMware
+  product: VMware Aria Operations for Logs (vRLI)
+  confidence: 0.92
+  required_patterns:
+  - '"appname"\s*:\s*"[^"]+"'
+  - '"hostname"\s*:\s*"[^"]+"'
+  - '"text"\s*:\s*"[^"]+"'
+  line_patterns:
+  - '"timestamp":'
+  - '"fields":'
+  - '"source":'
+  - '"facility":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: vmware:sddc:manager
+  category: infrastructure
+  vendor: VMware
+  product: VMware Cloud Foundation SDDC Manager
+  confidence: 0.92
+  required_patterns:
+  - '"domainId"\s*:\s*"[0-9a-f-]{36}"'
+  - '"workflowType"\s*:\s*"(WORKLOAD_DOMAIN|CLUSTER|HOST)"'
+  line_patterns:
+  - '"status":'
+  - '"creationTimestamp":'
+  - '"name":'
+  - '"type":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: juniper:junos:firewall
+  category: network
+  vendor: Juniper
+  product: Juniper JunOS Firewall Filter
+  confidence: 0.94
+  required_patterns:
+  - RT_FLOW_SESSION_(CREATE|CLOSE)|FILTER_LOG|FIREWALL
+  line_patterns:
+  - src-ip=
+  - dst-ip=
+  - protocol-id=
+  - rule-name=
+  min_matches: 0
+  filter_mode: line
+  line_filter: RT_FLOW_SESSION|FILTER_LOG|FIREWALL.*src-ip=
+- sourcetype: juniper:junos:idp
+  category: network
+  vendor: Juniper
+  product: Juniper IDP / IPS
+  confidence: 0.94
+  required_patterns:
+  - IDP_ATTACK_(START|FINISH)|SCREEN_ATTCK|IDP_APPDDOS
+  line_patterns:
+  - attack-name=
+  - severity=
+  - source-address=
+  - destination-address=
+  min_matches: 0
+  filter_mode: line
+  line_filter: IDP_ATTACK|SCREEN_ATTCK|IDP_APPDDOS
+- sourcetype: juniper:junos:npu
+  category: network
+  vendor: Juniper
+  product: Juniper MX/SRX NPU Logs
+  confidence: 0.91
+  required_patterns:
+  - '%DAEMON-\d+-RT_FLOW|RTLOG_FLOW'
+  - fpc\d+.*pfe\d+
+  line_patterns:
+  - fpc
+  - pfe
+  - bpdu
+  - rpd
+  - l2ald
+  min_matches: 0
+  filter_mode: line
+  line_filter: fpc\d+.*pfe\d+|RTLOG_FLOW
+- sourcetype: juniper:mist:events
+  category: network
+  vendor: Juniper
+  product: Juniper Mist AI Wireless
+  confidence: 0.94
+  required_patterns:
+  - '"org_id"\s*:\s*"[0-9a-f-]{36}"'
+  - '"site_id"\s*:\s*"[0-9a-f-]{36}"'
+  line_patterns:
+  - '"ap":'
+  - '"client_mac":'
+  - '"ssid":'
+  - '"type":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: juniper:mist:audit
+  category: network
+  vendor: Juniper
+  product: Juniper Mist Audit Logs
+  confidence: 0.93
+  required_patterns:
+  - '"admin_id"\s*:\s*"[0-9a-f-]{36}"'
+  - '"org_id"\s*:\s*"[0-9a-f-]{36}"'
+  line_patterns:
+  - '"admin_name":'
+  - '"message":'
+  - '"src_ip":'
+  - '"timestamp":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: juniper:space:syslog
+  category: network
+  vendor: Juniper
+  product: Juniper Space / Security Director
+  confidence: 0.91
+  required_patterns:
+  - junos-space|Juniper Networks Security Director
+  - space-audit|SecurityDirector
+  line_patterns:
+  - admin
+  - session
+  - operation
+  - policy
+  min_matches: 0
+  filter_mode: line
+  line_filter: junos-space|SecurityDirector|space-audit
+- sourcetype: juniper:apstra
+  category: network
+  vendor: Juniper
+  product: Juniper Apstra (Intent-Based Networking)
+  confidence: 0.92
+  required_patterns:
+  - '"blueprint_id"\s*:\s*"[0-9a-f-]{36}"'
+  - '"anomaly_type"\s*:\s*"'
+  line_patterns:
+  - '"severity":'
+  - '"label":'
+  - '"expected":'
+  - '"actual":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: bluecoat:proxysg:access:syslog
+  category: network
+  vendor: Broadcom
+  product: Broadcom ProxySG Access Log (Syslog)
+  confidence: 0.95
+  required_patterns:
+  - (PROXYSVC|proxy_services|BlueCoat|SGOS)\s+
+  - \d+\.\d+\.\d+\.\d+\s+\d+\.\d+\.\d+\.\d+\s+\d+\s+(TCP|UDP)_
+  line_patterns:
+  - TCP_
+  - UDP_
+  - CONNECT
+  - DIRECT
+  - CACHE_HIT
+  - CACHE_MISS
+  min_matches: 0
+  filter_mode: line
+  line_filter: (TCP|UDP)_(HIT|MISS|CONNECT|DENIED|TUNNEL)|PROXYSVC
+- sourcetype: bluecoat:proxysg:access:file
+  category: network
+  vendor: Broadcom
+  product: Broadcom ProxySG Access Log (W3C File)
+  confidence: 0.94
+  required_patterns:
+  - '#Software:\s+(SGOS|Blue Coat SG)'
+  - '#Fields:\s+date\s+time'
+  line_patterns:
+  - c-ip
+  - cs-username
+  - cs-uri-stem
+  - sc-status
+  - cs-categories
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: iis
+- sourcetype: symantec:proxy:access
+  category: network
+  vendor: Broadcom
+  product: Broadcom Symantec Web Security Service
+  confidence: 0.93
+  required_patterns:
+  - (Symantec Web Security|WSS|Web Filter).*access
+  - '"policyAction"\s*:\s*"(allow|block|warn)"'
+  line_patterns:
+  - '"requestMethod":'
+  - '"statusCode":'
+  - '"categories":'
+  - '"userId":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: infoblox:audit
+  category: network
+  vendor: Infoblox
+  product: Infoblox NIOS Audit Log
+  confidence: 0.94
+  required_patterns:
+  - infoblox.*audit|\bmodified by\b.*\bto\b|InfobloxAudit
+  line_patterns:
+  - admin
+  - modified
+  - created
+  - deleted
+  - object_type
+  min_matches: 0
+  filter_mode: line
+  line_filter: infoblox.*audit|InfobloxAudit|modified by.*to
+- sourcetype: infoblox:threat:intel
+  category: network
+  vendor: Infoblox
+  product: Infoblox Threat Intelligence
+  confidence: 0.95
+  required_patterns:
+  - '"threat_class"\s*:\s*"'
+  - '"infoblox_dossier"\s*:\s*\{|"rpm_threat_level"\s*:\s*"'
+  line_patterns:
+  - '"confidence":'
+  - '"threat_property":'
+  - '"indicator":'
+  - '"feed_name":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: infoblox:bloxone:threat:defense
+  category: network
+  vendor: Infoblox
+  product: Infoblox BloxOne Threat Defense
+  confidence: 0.95
+  required_patterns:
+  - '"feed_name"\s*:\s*"BloxOne|"threat_indicator"\s*:\s*"'
+  - '"device_name"\s*:\s*"'
+  line_patterns:
+  - '"confidence":'
+  - '"threat_level":'
+  - '"policy_action":'
+  - '"dns_view":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: infoblox:dhcp:lease
+  category: network
+  vendor: Infoblox
+  product: Infoblox DHCP Lease Events
+  confidence: 0.93
+  required_patterns:
+  - dhcpd\[\d+\]:.*(DHCPACK|DHCPOFFER|DHCPREQUEST|DHCPDISCOVER)
+  - infoblox.*leases
+  line_patterns:
+  - DHCPACK
+  - DHCPDISCOVER
+  - DHCPOFFER
+  - DHCPREQUEST
+  - via
+  min_matches: 0
+  filter_mode: line
+  line_filter: DHCPACK|DHCPDISCOVER|DHCPOFFER|DHCPREQUEST|DHCPRELEASE
+- sourcetype: arista:eos:syslog
+  category: network
+  vendor: Arista
+  product: Arista EOS Switch/Router
+  confidence: 0.94
+  required_patterns:
+  - '%ARISTA-\d+-\S+:|Arista Networks EOS'
+  line_patterns:
+  - Ethernet
+  - Vlan
+  - Management
+  - Loopback
+  - bgp
+  - ospf
+  min_matches: 0
+  filter_mode: line
+  line_filter: '%ARISTA-\d+-|Arista.*EOS'
+- sourcetype: arista:eos:audit
+  category: network
+  vendor: Arista
+  product: Arista EOS Command Audit
+  confidence: 0.93
+  required_patterns:
+  - '%SYS-\d+-AUDIT_CLOSE_SESSION|%SECURITY-\d+-SECURITY_AUDIT'
+  line_patterns:
+  - user=
+  - privilege=
+  - session=
+  - command=
+  min_matches: 0
+  filter_mode: line
+  line_filter: AUDIT_CLOSE_SESSION|SECURITY_AUDIT
+- sourcetype: arista:cloudvision:syslog
+  category: network
+  vendor: Arista
+  product: Arista CloudVision Portal (CVP)
+  confidence: 0.92
+  required_patterns:
+  - '"type"\s*:\s*"(CVP|cloudvision)"'
+  - '"deviceId"\s*:\s*"[0-9A-F:]{17}"'
+  line_patterns:
+  - '"eventSeverity":'
+  - '"data":'
+  - '"title":'
+  - '"timestamp":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: zscaler:zia:dns
+  category: network
+  vendor: Zscaler
+  product: Zscaler Internet Access DNS Log
+  confidence: 0.95
+  required_patterns:
+  - '"sourcetype"\s*:\s*"zscalernss-dns"|ZscalerNSS.*dns'
+  line_patterns:
+  - '"dns_req":'
+  - '"dns_resp":'
+  - '"srv_dport":'
+  - '"dns_reqtype":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: zscaler:zia:tunnel
+  category: network
+  vendor: Zscaler
+  product: Zscaler Internet Access Tunnel Log
+  confidence: 0.95
+  required_patterns:
+  - '"sourcetype"\s*:\s*"zscalernss-tunnel"|ZscalerNSS.*tunnel'
+  line_patterns:
+  - '"tunneltype":'
+  - '"lifetime":'
+  - '"ikeversion":'
+  - '"destip":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: zscaler:zia:casb
+  category: network
+  vendor: Zscaler
+  product: Zscaler CASB Log
+  confidence: 0.94
+  required_patterns:
+  - '"sourcetype"\s*:\s*"zscalernss-casb"'
+  line_patterns:
+  - '"app":'
+  - '"appgroup":'
+  - '"apprisk":'
+  - '"dlpdicthitcount":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: zscaler:zpa:user:activity
+  category: network
+  vendor: Zscaler
+  product: Zscaler Private Access User Activity
+  confidence: 0.95
+  required_patterns:
+  - '"LogTimestamp"\s*:\s*"'
+  - '"AppName"\s*:\s*"'
+  - '"ZPAPublicSvcEdge"\s*:\s*"'
+  line_patterns:
+  - '"ConnectionID":'
+  - '"InternalReason":'
+  - '"BytesRx":'
+  - '"BytesTx":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: zscaler:zpa:user:status
+  category: network
+  vendor: Zscaler
+  product: Zscaler Private Access User Status
+  confidence: 0.94
+  required_patterns:
+  - '"LogTimestamp"\s*:\s*"'
+  - '"Customer"\s*:\s*"'
+  - '"SessionID"\s*:\s*"'
+  line_patterns:
+  - '"Username":'
+  - '"ZENLatitude":'
+  - '"ZENLongitude":'
+  - '"PrivateIP":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: f5:bigip:gtm:dns
+  category: network
+  vendor: F5
+  product: F5 BIG-IP GTM/DNS
+  confidence: 0.93
+  required_patterns:
+  - gtmd\[\d+\]:|zxfrd\[\d+\]:|GTM\s+\S+
+  line_patterns:
+  - pool
+  - wideip
+  - datacenter
+  - virtual-server
+  min_matches: 0
+  filter_mode: line
+  line_filter: gtmd\[|zxfrd\[|GTM.*pool
+- sourcetype: f5:bigip:apm:access
+  category: network
+  vendor: F5
+  product: F5 BIG-IP APM Access Policy
+  confidence: 0.93
+  required_patterns:
+  - apmd\[\d+\]:|APM_ACCESS|APM_POLICY
+  line_patterns:
+  - session.user
+  - ACCESS_POLICY_RESULT
+  - session.logon
+  - client_ip
+  min_matches: 0
+  filter_mode: line
+  line_filter: apmd\[|APM_ACCESS|APM_POLICY
+- sourcetype: f5:bigip:irule
+  category: network
+  vendor: F5
+  product: F5 BIG-IP iRule Logs
+  confidence: 0.91
+  required_patterns:
+  - rule\s+\S+\s+<\S+>:|TCL error in rule
+  line_patterns:
+  - client_addr
+  - virtual
+  - pool
+  - HTTP::uri
+  min_matches: 0
+  filter_mode: line
+  line_filter: rule\s+\S+\s+<|TCL error in rule
+- sourcetype: f5:bigip:syslog
+  category: network
+  vendor: F5
+  product: F5 BIG-IP System Syslog
+  confidence: 0.92
+  required_patterns:
+  - '(mcpd|tmm\d*|tmrouted|chmand|lind|gtmd)\[\d+\]:'
+  line_patterns:
+  - err
+  - warning
+  - notice
+  - bigip
+  min_matches: 0
+  filter_mode: line
+  line_filter: '(mcpd|tmm\d*|tmrouted|chmand|lind|gtmd)\[\d+\]:'
+- sourcetype: checkpoint:harmony:endpoint
+  category: endpoint
+  vendor: Check Point
+  product: Check Point Harmony Endpoint
+  confidence: 0.94
+  required_patterns:
+  - '"product"\s*:\s*"Harmony Endpoint"|"product"\s*:\s*"SandBlast Agent"'
+  - '"action"\s*:\s*"(Detect|Prevent|Allow)"'
+  line_patterns:
+  - '"severity":'
+  - '"malware_name":'
+  - '"dst":'
+  - '"src":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: checkpoint:smart:event
+  category: network
+  vendor: Check Point
+  product: Check Point SmartEvent
+  confidence: 0.93
+  required_patterns:
+  - '"product"\s*:\s*"SmartEvent"'
+  - '"event_count"\s*:\s*\d+'
+  line_patterns:
+  - '"event_type":'
+  - '"src":'
+  - '"dst":'
+  - '"severity":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: checkpoint:mgmt:audit
+  category: network
+  vendor: Check Point
+  product: Check Point Management Audit
+  confidence: 0.93
+  required_patterns:
+  - '"product"\s*:\s*"SmartConsole"'
+  - '"operation"\s*:\s*"(add|modify|delete|rename)"'
+  line_patterns:
+  - '"administrator":'
+  - '"subject":'
+  - '"audit_status":'
+  - '"client_ip":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: okta:system:log:api
+  category: security
+  vendor: Okta
+  product: Okta System Log (API v1)
+  confidence: 0.95
+  required_patterns:
+  - '"published"\s*:\s*"\d{4}-\d{2}-\d{2}T'
+  - '"severity"\s*:\s*"(DEBUG|INFO|WARN|ERROR)"'
+  line_patterns:
+  - '"displayMessage":'
+  - '"actor":'
+  - '"outcome":'
+  - '"client":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: proofpoint:pod:message
+  category: email
+  vendor: Proofpoint
+  product: Proofpoint on Demand Message Log
+  confidence: 0.94
+  required_patterns:
+  - '"msgParts"\s*:\s*\['
+  - '"headerFrom"\s*:\s*"'
+  line_patterns:
+  - '"spamScore":'
+  - '"phishScore":'
+  - '"mlxScore":'
+  - '"disposition":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: proofpoint:pod:maillog
+  category: email
+  vendor: Proofpoint
+  product: Proofpoint on Demand Mail Log
+  confidence: 0.93
+  required_patterns:
+  - pps.*\[\d+\].*tls=
+  - Proofpoint Protection Server.*version=
+  line_patterns:
+  - rcpt=
+  - delay=
+  - stat=
+  - relay=
+  min_matches: 0
+  filter_mode: line
+  line_filter: pps.*\[\d+\]|Proofpoint Protection Server
+- sourcetype: mimecast:siem:ttp
+  category: email
+  vendor: Mimecast
+  product: Mimecast TTP (Targeted Threat Protection)
+  confidence: 0.94
+  required_patterns:
+  - '"type"\s*:\s*"(url|attachment|impersonation)"'
+  - '"action"\s*:\s*"(allow|block|sandbox)"'
+  line_patterns:
+  - '"route":'
+  - '"recipient":'
+  - '"sender":'
+  - '"subject":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: mimecast:siem:receipt
+  category: email
+  vendor: Mimecast
+  product: Mimecast Receipt Log
+  confidence: 0.93
+  required_patterns:
+  - '"agg"\s*:\s*"[^"]+"'
+  - '"tag"\s*:\s*"receipt"'
+  line_patterns:
+  - '"sender":'
+  - '"recipient":'
+  - '"Act":'
+  - '"SpamScore":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: delinea:sss:syslog
+  category: security
+  vendor: Delinea
+  product: Delinea Secret Server
+  confidence: 0.93
+  required_patterns:
+  - (SecretServer|Thycotic Secret Server).*Event|SECRET_SERVER_AUDIT
+  line_patterns:
+  - SecretName
+  - SecretID
+  - FolderName
+  - IPAddress
+  - Action
+  min_matches: 0
+  filter_mode: line
+  line_filter: SecretServer|Thycotic.*Event|SECRET_SERVER_AUDIT
+- sourcetype: delinea:dpc:syslog
+  category: security
+  vendor: Delinea
+  product: Delinea Privilege Manager (PrivMan)
+  confidence: 0.92
+  required_patterns:
+  - (PrivilegeManager|Privilege Manager).*Event|PRIVMAN_AUDIT
+  line_patterns:
+  - ComputerName
+  - UserName
+  - PolicyName
+  - ApplicationName
+  min_matches: 0
+  filter_mode: line
+  line_filter: PrivilegeManager|Privilege Manager|PRIVMAN_AUDIT
+- sourcetype: extrahop:revealx:detection
+  category: security
+  vendor: ExtraHop
+  product: ExtraHop Reveal(x) Detections
+  confidence: 0.93
+  required_patterns:
+  - '"type"\s*:\s*"[A-Z_]+"'
+  - '"appliance_id"\s*:\s*"[0-9a-f]+"'
+  line_patterns:
+  - '"risk_score":'
+  - '"categories":'
+  - '"participants":'
+  - '"mitre_tactics":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: netskope:events:application
+  category: network
+  vendor: Netskope
+  product: Netskope Application Events
+  confidence: 0.94
+  required_patterns:
+  - '"vendor"\s*:\s*"Netskope"'
+  - '"appcategory"\s*:\s*"'
+  line_patterns:
+  - '"app":'
+  - '"action":'
+  - '"user":'
+  - '"dstip":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: netskope:events:network
+  category: network
+  vendor: Netskope
+  product: Netskope Network Events
+  confidence: 0.93
+  required_patterns:
+  - '"netskope_pop"\s*:\s*"'
+  - '"tunnel_id"\s*:\s*"'
+  line_patterns:
+  - '"srcip":'
+  - '"dstip":'
+  - '"protocol":'
+  - '"action":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: netskope:events:alert
+  category: network
+  vendor: Netskope
+  product: Netskope Alert Events
+  confidence: 0.94
+  required_patterns:
+  - '"alert_type"\s*:\s*"(anomaly|policy|compromised credential|legal hold|malsite|malware|watchlist|quarantine|uba|ctep)"'
+  line_patterns:
+  - '"alert_name":'
+  - '"severity":'
+  - '"user":'
+  - '"app":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: sailpoint:identitynow:events
+  category: security
+  vendor: SailPoint
+  product: SailPoint IdentityNow
+  confidence: 0.93
+  required_patterns:
+  - '"org"\s*:\s*"[^"]+"'
+  - '"action"\s*:\s*"(provision|access request|certification|access review)"'
+  line_patterns:
+  - '"target":'
+  - '"actor":'
+  - '"attributes":'
+  - '"status":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: saviynt:audit
+  category: security
+  vendor: Saviynt
+  product: Saviynt EIC Audit
+  confidence: 0.91
+  required_patterns:
+  - '"ACCOUNTNAME"\s*:\s*"'
+  - '"SYSTEMNAME"\s*:\s*"'
+  line_patterns:
+  - '"ACTIVITYTYPE":'
+  - '"ENDPOINT":'
+  - '"USERNAME":'
+  - '"CUSTOMPROPERTY1":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: pingfederate:audit
+  category: security
+  vendor: Ping Identity
+  product: PingFederate Audit Log
+  confidence: 0.94
+  required_patterns:
+  - event=\S+\s+status=\S+\s+ip=\d+\.\d+\.\d+\.\d+
+  line_patterns:
+  - app=
+  - adapterId=
+  - subject=
+  - role=
+  min_matches: 0
+  filter_mode: line
+  line_filter: event=\S+.*status=\S+.*ip=\d
+- sourcetype: pingaccess:audit
+  category: security
+  vendor: Ping Identity
+  product: PingAccess Audit Log
+  confidence: 0.93
+  required_patterns:
+  - '"exchange_id"\s*:\s*"[0-9a-f-]{36}"'
+  - '"application"\s*:\s*"'
+  line_patterns:
+  - '"resource":'
+  - '"response_code":'
+  - '"subject":'
+  - '"method":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: hashicorp:vault:audit
+  category: security
+  vendor: HashiCorp
+  product: HashiCorp Vault Audit Log
+  confidence: 0.95
+  required_patterns:
+  - '"type"\s*:\s*"(request|response)"'
+  - '"auth"\s*:\s*\{[^}]*"token_type"'
+  line_patterns:
+  - '"request":'
+  - '"remote_address":'
+  - '"namespace":'
+  - '"mount_type":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: github:audit
+  category: security
+  vendor: GitHub
+  product: GitHub Enterprise Audit Log
+  confidence: 0.94
+  required_patterns:
+  - '"action"\s*:\s*"[a-z_]+\.[a-z_]+"'
+  - '"actor"\s*:\s*"[^"]+"'
+  - '"org"\s*:\s*"[^"]+"'
+  line_patterns:
+  - '"repo":'
+  - '"created_at":'
+  - '"actor_ip":'
+  - '"user":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: gitlab:audit
+  category: security
+  vendor: GitLab
+  product: GitLab Audit Events
+  confidence: 0.93
+  required_patterns:
+  - '"entity_type"\s*:\s*"(User|Project|Group|Key)"'
+  - '"author_name"\s*:\s*"'
+  line_patterns:
+  - '"details":'
+  - '"ip_address":'
+  - '"target_details":'
+  - '"target_type":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: kube:apiserver:audit
+  category: infrastructure
+  vendor: CNCF
+  product: Kubernetes API Server Audit
+  confidence: 0.95
+  required_patterns:
+  - '"apiVersion"\s*:\s*"audit\.k8s\.io/v\d+"'
+  - '"kind"\s*:\s*"Event"'
+  line_patterns:
+  - '"verb":'
+  - '"user":'
+  - '"responseStatus":'
+  - '"objectRef":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: kube:container:log
+  category: infrastructure
+  vendor: CNCF
+  product: Kubernetes Container Log
+  confidence: 0.91
+  required_patterns:
+  - '"kubernetes"\s*:\s*\{[^}]*"pod_name"\s*:\s*"'
+  - '"kubernetes"\s*:\s*\{[^}]*"namespace_name"'
+  line_patterns:
+  - '"container_name":'
+  - '"docker_id":'
+  - '"labels":'
+  - '"annotations":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: kube:events
+  category: infrastructure
+  vendor: CNCF
+  product: Kubernetes Events
+  confidence: 0.93
+  required_patterns:
+  - '"apiVersion"\s*:\s*"v1"'
+  - '"kind"\s*:\s*"Event"'
+  - '"involvedObject"\s*:\s*\{'
+  line_patterns:
+  - '"reason":'
+  - '"message":'
+  - '"source":'
+  - '"type":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: pagerduty:webhooks
+  category: monitoring
+  vendor: PagerDuty
+  product: PagerDuty Webhooks
+  confidence: 0.93
+  required_patterns:
+  - '"event"\s*:\s*\{[^}]*"id"\s*:\s*"[0-9A-Z]+"'
+  - '"event_type"\s*:\s*"incident\.'
+  line_patterns:
+  - '"incident":'
+  - '"log_entries":'
+  - '"service":'
+  - '"team":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: snow:incident
+  category: monitoring
+  vendor: ServiceNow
+  product: ServiceNow Incidents
+  confidence: 0.92
+  required_patterns:
+  - '"sys_class_name"\s*:\s*"incident"'
+  - '"incident_state"\s*:\s*"\d+"'
+  line_patterns:
+  - '"number":'
+  - '"short_description":'
+  - '"priority":'
+  - '"assignment_group":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: snow:audit
+  category: monitoring
+  vendor: ServiceNow
+  product: ServiceNow Audit Log
+  confidence: 0.92
+  required_patterns:
+  - '"tablename"\s*:\s*"[^"]+"'
+  - '"document_key"\s*:\s*"[a-f0-9]{32}"'
+  line_patterns:
+  - '"fieldname":'
+  - '"oldvalue":'
+  - '"newvalue":'
+  - '"user":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: trendmicro:apex:cef
+  category: endpoint
+  vendor: Trend Micro
+  product: Trend Micro Apex Central (CEF)
+  confidence: 0.94
+  required_patterns:
+  - ^CEF:\d+\|Trend Micro\|Apex Central
+  line_patterns:
+  - deviceExternalId=
+  - dvc=
+  - cat=
+  - act=
+  min_matches: 0
+  filter_mode: line
+  line_filter: ^CEF:\d+\|Trend Micro
+- sourcetype: trendmicro:deep:security
+  category: endpoint
+  vendor: Trend Micro
+  product: Trend Micro Deep Security
+  confidence: 0.93
+  required_patterns:
+  - TrendMicro-DeepSecurity|CEF:.*Trend Micro\|Deep Security
+  line_patterns:
+  - dhost=
+  - duser=
+  - cs1=
+  - cn1=
+  min_matches: 0
+  filter_mode: line
+  line_filter: TrendMicro-DeepSecurity|Deep Security
+- sourcetype: wazuh:alerts
+  category: security
+  vendor: Wazuh
+  product: Wazuh SIEM Alerts
+  confidence: 0.95
+  required_patterns:
+  - '"_source"\s*:\s*\{[^}]*"manager"\s*:\s*\{[^}]*"name"'
+  - '"rule"\s*:\s*\{[^}]*"level"\s*:\s*\d+'
+  line_patterns:
+  - '"agent":'
+  - '"decoder":'
+  - '"timestamp":'
+  - '"location":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: ossec:alerts
+  category: security
+  vendor: Wazuh
+  product: OSSEC/Wazuh Alerts (Flat)
+  confidence: 0.92
+  required_patterns:
+  - '\*\* Alert \d+\.\d+:\d+ - '
+  - 'Rule: \d+ .* level \d+'
+  line_patterns:
+  - 'Src IP:'
+  - 'User:'
+  - 'Location:'
+  - Decoded
+  min_matches: 0
+  filter_mode: line
+  line_filter: '\*\* Alert \d+|Rule: \d+ .*level \d+'
+- sourcetype: elastic:winlogbeat
+  category: windows
+  vendor: Elastic
+  product: Elastic Winlogbeat
+  confidence: 0.93
+  required_patterns:
+  - '"agent"\s*:\s*\{[^}]*"type"\s*:\s*"winlogbeat"'
+  - '"winlog"\s*:\s*\{[^}]*"channel"'
+  line_patterns:
+  - '"event_id":'
+  - '"computer_name":'
+  - '"record_id":'
+  - '"provider_name":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: elastic:filebeat
+  category: security
+  vendor: Elastic
+  product: Elastic Filebeat
+  confidence: 0.91
+  required_patterns:
+  - '"agent"\s*:\s*\{[^}]*"type"\s*:\s*"filebeat"'
+  - '"log"\s*:\s*\{[^}]*"file"\s*:\s*\{[^}]*"path"'
+  line_patterns:
+  - '"input":'
+  - '"prospector":'
+  - '"beat":'
+  - '"tags":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: WinEventLog:Microsoft-Windows-AppLocker/EXE and DLL
+  category: windows
+  vendor: Microsoft
+  product: Windows AppLocker
+  confidence: 0.94
+  required_patterns:
+  - <Channel>Microsoft-Windows-AppLocker/EXE and DLL</Channel>
+  line_patterns:
+  - <EventID>
+  - PolicyName
+  - RuleName
+  - FullFilePath
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: WinEventLog:Microsoft-Windows-AppLocker/MSI and Script
+  category: windows
+  vendor: Microsoft
+  product: Windows AppLocker MSI/Script
+  confidence: 0.93
+  required_patterns:
+  - <Channel>Microsoft-Windows-AppLocker/MSI and Script</Channel>
+  line_patterns:
+  - <EventID>
+  - PolicyName
+  - RuleName
+  - TargetFilePath
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: WinEventLog:Microsoft-Windows-CodeIntegrity/Operational
+  category: windows
+  vendor: Microsoft
+  product: Windows Code Integrity
+  confidence: 0.93
+  required_patterns:
+  - <Channel>Microsoft-Windows-CodeIntegrity/Operational</Channel>
+  line_patterns:
+  - <EventID>
+  - FileName
+  - PolicyNameBuffer
+  - SignatureLevel
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: WinEventLog:Microsoft-Windows-PrintService/Operational
+  category: windows
+  vendor: Microsoft
+  product: Windows Print Service
+  confidence: 0.92
+  required_patterns:
+  - <Channel>Microsoft-Windows-PrintService/Operational</Channel>
+  line_patterns:
+  - <EventID>
+  - PrinterName
+  - DocumentName
+  - UserSID
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: xml_event
+- sourcetype: docker:events
+  category: infrastructure
+  vendor: Docker
+  product: Docker Engine Events
+  confidence: 0.95
+  required_patterns:
+  - '"Type"\s*:\s*"(container|image|network|volume|plugin|daemon)"'
+  - '"Action"\s*:\s*"(start|stop|die|kill|create|destroy|attach|pull|push)"'
+  line_patterns:
+  - '"Actor":'
+  - '"time":'
+  - '"timeNano":'
+  - '"scope":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: docker:container:logs
+  category: infrastructure
+  vendor: Docker
+  product: Docker Container Logs (JSON file driver)
+  confidence: 0.94
+  required_patterns:
+  - '"log"\s*:\s*"[^"]+"'
+  - '"stream"\s*:\s*"(stdout|stderr)"'
+  line_patterns:
+  - '"time":\s*"\d{4}-\d{2}-\d{2}T'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: docker:daemon:log
+  category: infrastructure
+  vendor: Docker
+  product: Docker Daemon Syslog
+  confidence: 0.93
+  required_patterns:
+  - dockerd\[\d+\]:|docker\.service.*dockerd
+  line_patterns:
+  - containerd
+  - layer
+  - graphdriver
+  - namespace
+  min_matches: 0
+  filter_mode: line
+  line_filter: dockerd\[\d+\]:|docker\.service
+- sourcetype: docker:stats
+  category: infrastructure
+  vendor: Docker
+  product: Docker Container Stats
+  confidence: 0.92
+  required_patterns:
+  - '"cpu_stats"\s*:\s*\{'
+  - '"memory_stats"\s*:\s*\{'
+  line_patterns:
+  - '"networks":'
+  - '"blkio_stats":'
+  - '"pids_stats":'
+  - '"id":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: docker:registry:access
+  category: infrastructure
+  vendor: Docker
+  product: Docker Registry / Harbor Access Log
+  confidence: 0.92
+  required_patterns:
+  - '"repository"\s*:\s*"[^/]+/[^"]+"'
+  - '"action"\s*:\s*"(push|pull|delete)"'
+  line_patterns:
+  - '"tag":'
+  - '"digest":'
+  - '"username":'
+  - '"requestURI":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: vmware:esxi:vmkernel
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi VMkernel Log
+  confidence: 0.95
+  required_patterns:
+  - vmkernel:\s+\d{4}-\d{2}-\d{2}T|cpu\d+:\d+\).*vmkernel
+  line_patterns:
+  - WARNING
+  - ALERT
+  - PANIC
+  - NMP
+  - SCSI
+  - vmnic
+  - vmhba
+  min_matches: 0
+  filter_mode: line
+  line_filter: vmkernel:|cpu\d+:\d+\)
+- sourcetype: vmware:esxi:hostd
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Hostd Log
+  confidence: 0.95
+  required_patterns:
+  - 'Hostd\[\d+\]:'
+  - 'hostd\[\d+\]:'
+  line_patterns:
+  - vim.vm
+  - vim.host
+  - VirtualMachine
+  - HostConfigManager
+  - UserSession
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Hh]ostd\[\d+\]:'
+- sourcetype: vmware:esxi:vpxa
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi VPXA Agent Log
+  confidence: 0.94
+  required_patterns:
+  - 'Vpxa\[\d+\]:'
+  - 'vpxa\[\d+\]:'
+  line_patterns:
+  - VpxaHalCnx
+  - VpxdInvtHostSyncMgr
+  - HostConnect
+  - VirtualCenter
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Vv]pxa\[\d+\]:'
+- sourcetype: vmware:esxi:fdm
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi FDM (HA Agent) Log
+  confidence: 0.94
+  required_patterns:
+  - 'fdm\[\d+\]:'
+  - 'Fdm\[\d+\]:'
+  line_patterns:
+  - HA
+  - failover
+  - heartbeat
+  - election
+  - master
+  - slave
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Ff]dm\[\d+\]:'
+- sourcetype: vmware:esxi:vobd
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi VOBD (Hardware Events) Log
+  confidence: 0.94
+  required_patterns:
+  - 'vobd\[\d+\]:'
+  - 'Vobd\[\d+\]:'
+  line_patterns:
+  - hardwareEvent
+  - obsvbl
+  - sensor
+  - chassis
+  - power
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Vv]obd\[\d+\]:'
+- sourcetype: vmware:esxi:shell
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Shell Log
+  confidence: 0.94
+  required_patterns:
+  - 'ESXi Shell for .* (enabled|disabled)|shell\[\d+\]:'
+  - SSH login .* (accepted|refused)
+  line_patterns:
+  - esxcli
+  - vim-cmd
+  - localcli
+  - root
+  - dcui
+  min_matches: 0
+  filter_mode: line
+  line_filter: ESXi Shell|shell\[\d+\]:|SSH login
+- sourcetype: vmware:esxi:auth
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Auth Log
+  confidence: 0.94
+  required_patterns:
+  - (sshd|pam_unix|login|passwd|su)\[\d+\]:.*(ESXi|esxi|vmware)
+  - VMware ESXi.*auth
+  line_patterns:
+  - Accepted
+  - Failed
+  - session opened
+  - session closed
+  - authentication failure
+  min_matches: 0
+  filter_mode: line
+  line_filter: sshd\[\d+\]:|pam_unix.*esxi|VMware ESXi.*auth
+- sourcetype: vmware:esxi:storage
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Storage / SCSI Log
+  confidence: 0.93
+  required_patterns:
+  - '(NMP|VMFS|SCSI|vmhba)\s+\S+.*H:\d+\s+D:\d+|StorageRM\[\d+\]:'
+  line_patterns:
+  - SCSI sense
+  - H:0x0
+  - D:0x2
+  - VMFS
+  - NMP
+  - vmhba
+  min_matches: 0
+  filter_mode: line
+  line_filter: NMP\s+|VMFS\s+|vmhba\d+|StorageRM\[
+- sourcetype: vmware:esxi:vsan
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi vSAN Log
+  confidence: 0.94
+  required_patterns:
+  - 'vsanmgmtd\[\d+\]:|CMMDS\[\d+\]:|vsan\[\d+\]:'
+  line_patterns:
+  - diskGroup
+  - cacheLayer
+  - capacityLayer
+  - resync
+  - deduplication
+  min_matches: 0
+  filter_mode: line
+  line_filter: vsanmgmtd\[|CMMDS\[|vsan\[
+- sourcetype: vmware:esxi:vmkwarning
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi VMkernel Warnings
+  confidence: 0.93
+  required_patterns:
+  - vmkwarning.*cpu\d+:\d+\)|vmkwarning.*\d{4}-\d{2}-\d{2}
+  line_patterns:
+  - WARNING
+  - dropped
+  - timeout
+  - failure
+  - error
+  min_matches: 0
+  filter_mode: line
+  line_filter: vmkwarning
+- sourcetype: vmware:esxi:syslog
+  category: infrastructure
+  vendor: VMware
+  product: VMware ESXi Syslog (remote syslog)
+  confidence: 0.93
+  required_patterns:
+  - '\S+\.vmware\.com\s+\S+\[\d+\]:|esxi\d*\s+\S+\[\d+\]:'
+  line_patterns:
+  - vmkernel
+  - Hostd
+  - Vpxa
+  - fdm
+  - vobd
+  - vmkwarning
+  min_matches: 0
+  filter_mode: line
+  line_filter: \.vmware\.com\s+\S+\[|esxi\d*\s+\S+\[
+- sourcetype: vmware:vcenter:vpxd
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter VPXD (Main Service) Log
+  confidence: 0.95
+  required_patterns:
+  - 'vpxd\[\d+\]:'
+  - 'Vpxd\[\d+\]:'
+  line_patterns:
+  - VirtualCenter
+  - HostConnect
+  - TaskScheduler
+  - AlarmManager
+  - SessionManager
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Vv]pxd\[\d+\]:'
+- sourcetype: vmware:vcenter:eam
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter ESX Agent Manager Log
+  confidence: 0.93
+  required_patterns:
+  - 'eam\[\d+\]:|esxAgentManager\[\d+\]:'
+  line_patterns:
+  - Agency
+  - VIBDeploy
+  - agentVm
+  - hostmgr
+  min_matches: 0
+  filter_mode: line
+  line_filter: eam\[\d+\]:|esxAgentManager\[
+- sourcetype: vmware:vcenter:rhttpproxy
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter Reverse HTTP Proxy Log
+  confidence: 0.92
+  required_patterns:
+  - 'rhttpproxy\[\d+\]:|RHttpProxy\[\d+\]:'
+  line_patterns:
+  - CONNECT
+  - GET
+  - POST
+  - SSL
+  - tunnel
+  min_matches: 0
+  filter_mode: line
+  line_filter: '[Rr][Hh]ttp[Pp]roxy\[\d+\]:'
+- sourcetype: vmware:vcenter:sts
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter SSO / STS Log
+  confidence: 0.93
+  required_patterns:
+  - (ssoAdminServer|vmware-sso|sts)\[\d+\]:|com\.vmware\.identity
+  line_patterns:
+  - SSO
+  - token
+  - SAML
+  - assertion
+  - principal
+  - tenant
+  min_matches: 0
+  filter_mode: line
+  line_filter: ssoAdminServer\[|vmware-sso\[|com\.vmware\.identity
+- sourcetype: vmware:vcenter:vpostgres
+  category: infrastructure
+  vendor: VMware
+  product: VMware vCenter Embedded PostgreSQL Log
+  confidence: 0.92
+  required_patterns:
+  - 'vpostgres\[\d+\]:|VCDB.*postgres|vcdb.*\[\d+\]:'
+  line_patterns:
+  - FATAL
+  - ERROR
+  - LOG
+  - HINT
+  - DETAIL
+  - database system
+  min_matches: 0
+  filter_mode: line
+  line_filter: vpostgres\[|VCDB.*postgres
+- sourcetype: vmware:nsx:intelligence
+  category: infrastructure
+  vendor: VMware
+  product: VMware NSX Intelligence
+  confidence: 0.92
+  required_patterns:
+  - '"product"\\s*:\\s*"NSX Intelligence"'
+  - '"detectionName"\\s*:\\s*"'
+  line_patterns:
+  - '"riskScore":'
+  - '"attackTechnique":'
+  - '"flowContext":'
+  - '"recommendation":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: vmware:nsx:ids
+  category: infrastructure
+  vendor: VMware
+  product: VMware NSX IDS/IPS
+  confidence: 0.94
+  required_patterns:
+  - NSX.*IDS|nsxids\[\d+\]:|NIDS\s+\d+\s+\[.*\]
+  line_patterns:
+  - signature
+  - attack
+  - severity
+  - proto
+  - src
+  - dst
+  min_matches: 0
+  filter_mode: line
+  line_filter: NSX.*IDS|nsxids\[|NIDS\s+\d+
+- sourcetype: vmware:vsan:health
+  category: infrastructure
+  vendor: VMware
+  product: VMware vSAN Health Events
+  confidence: 0.93
+  required_patterns:
+  - '"objectType"\\s*:\\s*"(vsan|VsanCluster|VsanDisk)"'
+  - '"healthStatus"\\s*:\\s*"(green|yellow|red)"'
+  line_patterns:
+  - '"testId":'
+  - '"testName":'
+  - '"clusterUuid":'
+  - '"hostname":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: vmware:workspace_one:audit
+  category: infrastructure
+  vendor: VMware
+  product: VMware Workspace ONE UEM / AirWatch
+  confidence: 0.93
+  required_patterns:
+  - '"EventType"\\s*:\\s*"(Device|User|Admin|App|Policy)"'
+  - '"EnrollmentStatus"\\s*:\\s*"(Enrolled|Unenrolled|EnterpriseWipePending)"'
+  line_patterns:
+  - '"DeviceSerialNumber":'
+  - '"OrganizationGroupName":'
+  - '"UserName":'
+  - '"Platform":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: vmware:workspace_one:events
+  category: infrastructure
+  vendor: VMware
+  product: VMware Workspace ONE Intelligence Events
+  confidence: 0.92
+  required_patterns:
+  - '"source"\\s*:\\s*"Workspace ONE"'
+  - '"event_type"\\s*:\\s*"(Threat|Compliance|CveDevice)"'
+  line_patterns:
+  - '"device_id":'
+  - '"severity":'
+  - '"recommendation":'
+  - '"cve_id":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: carbonblack:cloud:alert
+  category: endpoint
+  vendor: VMware
+  product: Carbon Black Cloud Alerts
+  confidence: 0.95
+  required_patterns:
+  - '"type"\\s*:\\s*"CB_ANALYTICS"'
+  - '"device_os"\\s*:\\s*"(WINDOWS|MAC|LINUX)"'
+  line_patterns:
+  - '"severity":'
+  - '"threat_id":'
+  - '"ioc_hit":'
+  - '"device_name":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: carbonblack:cloud:endpoint.event
+  category: endpoint
+  vendor: VMware
+  product: Carbon Black Cloud Endpoint Events
+  confidence: 0.94
+  required_patterns:
+  - '"type"\\s*:\\s*"endpoint.event\.(process|filemod|netconn|regmod|modload|crossproc)"'
+  line_patterns:
+  - '"device_id":'
+  - '"process_guid":'
+  - '"parent_guid":'
+  - '"org_id":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_lines
+- sourcetype: azure:aad:signin:ecs
+  category: cloud
+  vendor: Microsoft
+  product: Azure AD Sign-In Logs (ECS/Elastic normalized)
+  confidence: 0.97
+  required_patterns:
+  - '"event\.dataset"\s*:\s*"azure\.signinlogs"'
+  - '"azure\.signinlogs\.category"\s*:\s*"SignInLogs"'
+  line_patterns:
+  - '"azure\.tenant_id":'
+  - '"event\.outcome":'
+  - '"user\.name":'
+  - '"client\.ip":'
+  - '"azure\.signinlogs\.properties\.risk_state":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: azure:aad:audit:ecs
+  category: cloud
+  vendor: Microsoft
+  product: Azure AD Audit Logs (ECS/Elastic normalized)
+  confidence: 0.97
+  required_patterns:
+  - '"event\.dataset"\s*:\s*"azure\.auditlogs"'
+  - '"azure\.auditlogs\.category"\s*:\s*"AuditLogs"'
+  line_patterns:
+  - '"azure\.tenant_id":'
+  - '"azure\.auditlogs\.operation_name":'
+  - '"azure\.auditlogs\.properties\.initiated_by":'
+  - '"azure\.auditlogs\.properties\.target_resources":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: azure:ecs
+  category: cloud
+  vendor: Microsoft
+  product: Azure Logs (ECS/Elastic normalized)
+  confidence: 0.93
+  required_patterns:
+  - '"event\.module"\s*:\s*"azure"'
+  - '"event\.dataset"\s*:\s*"azure\.'
+  line_patterns:
+  - '"azure\.resource\.provider":'
+  - '"cloud\.provider"\s*:\s*"azure"'
+  - '"azure\.correlation_id":'
+  - '"azure\.tenant_id":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
+- sourcetype: elastic:ecs:azure
+  category: cloud
+  vendor: Elastic
+  product: Elastic Azure Integration (ECS)
+  confidence: 0.92
+  required_patterns:
+  - '"fileset\.name"\s*:\s*"(signinlogs|auditlogs|activitylogs|firewall)"'
+  - '"service\.type"\s*:\s*"azure"'
+  line_patterns:
+  - '"input\.type":'
+  - '"event\.original":'
+  - '"log\.offset":'
+  min_matches: 0
+  filter_mode: multiline
+  multiline_mode: json_object
