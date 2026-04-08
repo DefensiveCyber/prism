@@ -424,6 +424,8 @@ The result card shows two types of matched patterns with distinct styling:
 ---
 
 ## Log Cleaning
+<img width="1900" height="1027" alt="image" src="https://github.com/user-attachments/assets/57075e5b-3892-4d1e-a048-49f213b4c0af" />
+<img width="717" height="539" alt="image" src="https://github.com/user-attachments/assets/cb55e75c-37d3-41bc-bfee-6b99f3f6b344" />
 
 **File:** `cleaner.py`
 
