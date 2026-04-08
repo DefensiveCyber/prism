@@ -606,12 +606,13 @@ Every signature includes automatic log cleaning — dirty lines (banners, header
 
 | Mode | Count | Examples |
 |---|---|---|
-| `line` | ~120 | Syslog, CEF, PAN CSV, auditd, Cisco IOS |
-| `multiline/json_lines` | ~80 | CloudTrail, Azure AD, Okta, Suricata EVE |
-| `multiline/json_object` | ~50 | GuardDuty, Carbon Black, VMware |
-| `multiline/xml_event` | ~25 | Windows Event Log, EVTX |
-| `multiline/zeek_tsv` | 8 | All Zeek logs |
-| `multiline/iis` | 2 | IIS, ProxySG W3C |
-| `passthrough` | ~42 | Complex formats without a reliable line filter |
+| `line` | 166 | Syslog, CEF, PAN CSV, auditd, Cisco IOS, FTD, Fortinet, Check Point |
+| `multiline/json_lines` | 66 | Azure AD, Okta, CloudTrail, Suricata EVE, Docker, Netskope |
+| `multiline/json_object` | 60 | GuardDuty, Carbon Black, VMware vCenter, Kubernetes, ServiceNow |
+| `multiline/xml_event` | 23 | Windows Event Log, Sysmon, AppLocker, BITS, Print Service |
+| `multiline/zeek_tsv` | 8 | All Zeek logs (conn, dns, http, ssl, files, dhcp, notice, weird) |
+| `multiline/iis` | 2 | IIS W3C, Bluecoat ProxySG W3C |
+| `multiline/csv_with_header` | 2 | PAN Traffic CSV, Generic Firewall CSV |
+| `passthrough` | 0 | Signatures without a reliable line parsing pattern |
 
 See [README.md](README.md) for full cleaning documentation.
